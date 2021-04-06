@@ -1,0 +1,12 @@
+/* You can add global styles to this file, and also import other style files */
+
+
+:root {
+  --bd-size: 800px;
+  --row-height: calc(var(--bd-size) / 8);
+  --row-width: var(--bd-size);
+  --tile-width: calc(var(--row-width) / 8);
+  --black: #ffab73;
+  --white: #f8f4e1;
+
+}
