@@ -5,8 +5,9 @@ import {Guris} from '../../shared/globalConsts';
 import {Board} from '../board';
 import {Tile} from '../tile';
 import {Movable} from '../movable';
+import {HaveMoved} from '../haveMoved';
 
-export class Rook extends Movable implements AbstractFigure  {
+export class Rook extends HaveMoved implements AbstractFigure  {
   image: string;
 
   constructor(pos: Position, color: boolean, board: Board) {

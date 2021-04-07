@@ -29,7 +29,6 @@ export class BoardComponent implements OnInit {
 
   ngOnInit() {
     this.bd = new Board();
-    this.bd.rows.map(el => el.map(el => '' + el.position.y + el.position.row)).forEach(el => console.warn(el));
   }
 
 
@@ -39,8 +38,8 @@ export class BoardComponent implements OnInit {
   }
 
   moveFigure(newTile: Tile) {
+    this.selectedFigureTile.holder.move(newTile);
     newTile.holder = this.selectedFigureTile.holder;
-    console.error(this.selectedFigureTile.holder.move(newTile.position));
     this.selectedFigureTile.holder = null;
     this.endTurn();
   }

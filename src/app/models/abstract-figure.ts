@@ -1,5 +1,4 @@
 import {Position} from './position';
-import {Board} from './board';
 import {Tile} from './tile';
 
 export interface AbstractFigure {
@@ -9,4 +8,5 @@ export interface AbstractFigure {
 
   // findLegalMoves(): Position[];
   findPseudoLegalMoves(): Tile[];
+  move?(tile: Tile): void;
 }

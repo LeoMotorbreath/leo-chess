@@ -13,8 +13,11 @@ export class Movable {
     this.color = color;
   }
 
-  move(position: Position): void {
-    this.position = position;
+  move(tile: Tile): void {
+    if (tile.holder) {
+      this.board.removeFigure(tile.holder);
+    }
+    this.position = tile.position;
   }
 
   protected check(row, y): Tile | null {
