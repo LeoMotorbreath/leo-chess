@@ -1,6 +1,8 @@
 
 import {Tile} from './tile';
 
+
+//good to rework;
 export function getStraightMoves(): Tile[] {
   const moves = [];
   for (let row = this.position.row + 1; row < 8; row++) {

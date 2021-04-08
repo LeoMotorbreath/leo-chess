@@ -22,7 +22,7 @@ export class Pawn extends HaveMoved implements AbstractFigure {
       this.checkStr(nextRow, this.position.y),
       this.check(nextRow, this.position.y + 1)
     ];
-    if (!this.haveMoved) {
+    if (this.haventMoved) {
       basic.push(this.checkStr(nextRow + this.direction, this.position.y));
     }
     return basic.filter(el => !!el);

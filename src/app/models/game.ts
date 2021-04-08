@@ -23,7 +23,6 @@ export class GameController implements IGameController {
   }
 
   isTileUnderAttack(tile): boolean {
-    this.board.figures;
     return false;
   }
 

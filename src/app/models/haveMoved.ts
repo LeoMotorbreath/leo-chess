@@ -6,7 +6,7 @@ import {Tile} from './tile';
 
 
 export class HaveMoved extends Movable {
-  haveMoved = false;
+  haventMoved = true;
 
   constructor(board: Board, pos: Position, color: boolean) {
     super(board, pos, color);
@@ -14,7 +14,7 @@ export class HaveMoved extends Movable {
 
   move(tile: Tile) {
     super.move(tile);
-    this.haveMoved = true;
+    this.haventMoved = false;
   }
 }
 

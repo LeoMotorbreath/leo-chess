@@ -1,16 +1,19 @@
 import {Position} from './position';
 import {AbstractFigure} from './abstract-figure';
+import {HaveMoved} from "./haveMoved";
+
+type TileHolder = AbstractFigure | HaveMoved | null
 
 export interface ITile {
   position: Position;
-  holder: AbstractFigure | null;
+  holder: TileHolder;
   color: boolean;
   style: object;
 }
 
-export class Tile implements ITile {
+export class Tile implements ITile{
   color: false | true;
-  holder: AbstractFigure | null;
+  holder: TileHolder;
   position: Position;
   style: any = {};
   constructor(position, color) {

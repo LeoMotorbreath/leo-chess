@@ -7,6 +7,6 @@ export interface AbstractFigure {
   color: boolean;
 
   // findLegalMoves(): Position[];
-  findPseudoLegalMoves(): Tile[];
+  findPseudoLegalMoves(dontCheckDanger?: boolean): Tile[];
   move?(tile: Tile): void;
 }

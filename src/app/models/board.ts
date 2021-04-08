@@ -56,17 +56,17 @@ export class Board {
     return null
   }
 
-  isPositionUnderAttack(position: Position, attackersColor: boolean): boolean {
+  isPositionUnderAttack(position: Position, attackersColor: boolean, ): boolean {
     const figuresToCheck =  attackersColor ? this.whiteFigures : this.blackFigures;
-    for (let i = 0; i < figuresToCheck.length; i++) {
-      if (figuresToCheck[i].findPseudoLegalMoves().find(tile => this.posEqual(tile.position, position))) {
-        console.error('very fuck');
-      };
-    }
-    return false;
+    return figuresToCheck.
+      map(el => el.findPseudoLegalMoves(true)).
+      reduce((acc, curValue) => acc.concat(curValue)).
+      reduce((acc, tile) => !!acc || this.posEqual(tile.position, position), false);
   }
 
   private posEqual(pos1: Position, pos2: Position): boolean {
+    if((pos1.row === pos2.row) && (pos1.y === pos2.y)) {
+    }
     return (pos1.row === pos2.row) && (pos1.y === pos2.y);
   }
 }
