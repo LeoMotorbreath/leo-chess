@@ -2,7 +2,7 @@
 
 
 :root {
-  --bd-size: 800px;
+  --bd-size: 500px;
   --row-height: calc(var(--bd-size) / 8);
   --row-width: var(--bd-size);
   --tile-width: calc(var(--row-width) / 8);

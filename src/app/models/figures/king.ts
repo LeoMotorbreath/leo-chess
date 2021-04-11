@@ -15,17 +15,9 @@ export class King extends HaveMoved implements AbstractFigure {
 
   findPseudoLegalMoves(dontCheckDanger: boolean): Tile[] {
     /// if remove dont check danger got stack overflow
-    if ( this.haventMoved && !dontCheckDanger && !this.board.isPositionUnderAttack(this.position, !this.color)) {
-      console.warn('we try to castle!');
-      const row = (this.board.rows[this.position.row])
-      if (row[0].holder && (row[0].holder as HaveMoved).haventMoved) {
-        this.getCastlePathIsUnderAttack(0,this.position.y - 1, row);
-      }
-      if(row[7].holder && (row[7].holder as HaveMoved).haventMoved) {
-        this.getCastlePathIsUnderAttack(this.position.y + 1, 8, row);
-      }
-    }
-    return [
+    const row = (this.board.rows[this.position.row])
+
+    const def = [
       this.check(this.position.row + 1, this.position.y - 1),
       this.check(this.position.row + 1, this.position.y),
       this.check(this.position.row + 1, this.position.y + 1),
@@ -35,21 +27,40 @@ export class King extends HaveMoved implements AbstractFigure {
       this.check(this.position.row - 1, this.position.y),
       this.check(this.position.row - 1, this.position.y - 1),
     ].filter(el => !!el);
-  }
 
-  private getCastleMoves(): Tile[] {
-    if (this.haventMoved && !this.board.isPositionUnderAttack(this.position, !this.color)) {
-      console.warn('we try to castle!');
-      // this.getCastlePathIsUnderAttack(0,)
+    if ( this.kingIsReadyToCastle(dontCheckDanger)) {
+      if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1,this.position.y - 1, row)) {
+        def.push(row[0])
+      } else {
+        console.error('invalid')
+      }
+      // if(this.kingReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 8, row)) {
+      // } else {
+      //   console.error('invalid')
+      // }
     }
-    return [];
+    return
+
+    return []
   }
 
-  private getCastlePathIsUnderAttack(start, end, row): boolean {
+  private getCastlePathValid(start, end, row): boolean {
+    let result = false;
     for (let i = start; i < end; i++) {
-
-      console.log(row[i],this.board.isPositionUnderAttack(row[i].position, !this.color))
+     if(!row[i].holder && !this.board.isPositionUnderAttack(row[i].position, !this.color)) {
+       result = true;
+     }
     }
-    return true;
+    return result;
   }
+
+  private kingIsReadyToCastle(dontCheckDanger) {
+    return this.haventMoved && !dontCheckDanger && !this.board.isPositionUnderAttack(this.position, !this.color);
+  }
+
+  private rookReadyToCastle(row, index) {
+    return row[index].holder && row[index].holder.color === this.color && (row[index].holder as HaveMoved).haventMoved;
+  }
+
+
 }

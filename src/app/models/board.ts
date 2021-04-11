@@ -56,7 +56,7 @@ export class Board {
     return null
   }
 
-  isPositionUnderAttack(position: Position, attackersColor: boolean, ): boolean {
+  isPositionUnderAttack(position: Position, attackersColor: boolean): boolean {
     const figuresToCheck =  attackersColor ? this.whiteFigures : this.blackFigures;
     return figuresToCheck.
       map(el => el.findPseudoLegalMoves(true)).

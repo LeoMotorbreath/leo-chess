@@ -34,7 +34,8 @@ export class BoardComponent implements OnInit {
 
   selectFigure(tile: Tile) {
     this.selectedFigureTile = tile;
-    this.setPossibleMoves(this.selectedFigureTile.holder.findPseudoLegalMoves(false));
+    this.setPossibleMoves((this.selectedFigureTile.holder as AbstractFigure)
+      .findPseudoLegalMoves(false));
   }
 
   moveFigure(newTile: Tile) {
