@@ -6,7 +6,6 @@ export interface AbstractFigure {
   image: string;
   color: boolean;
 
-  // findLegalMoves(): Position[];
   findPseudoLegalMoves(dontCheckDanger?: boolean): Tile[];
   move?(tile: Tile): void;
 }

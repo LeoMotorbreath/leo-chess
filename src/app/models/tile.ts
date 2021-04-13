@@ -15,6 +15,7 @@ export class Tile implements ITile{
   holder: TileHolder;
   position: Position;
   style: any = {};
+
   constructor(position, color) {
     this.position = position;
     this.color = color;

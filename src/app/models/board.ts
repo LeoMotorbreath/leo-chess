@@ -44,7 +44,6 @@ export class Board {
   }
 
   castle(kingPos: Position, rookPos: Position): void {
-    console.log(kingPos, rookPos);
     let row = kingPos.row
     let newPositions = this.getNewPositionsForCastling(row, kingPos, rookPos);
     let prevKTile = this.getTileByPosition(kingPos);

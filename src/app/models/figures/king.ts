@@ -36,8 +36,6 @@ export class King extends Movable implements AbstractFigure,IHaveMoved {
       }
       if(this.rookReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 8, row)) {
         def.push(row[7])
-      } else {
-        console.error('invalid')
       }
     }
 
@@ -56,7 +54,6 @@ export class King extends Movable implements AbstractFigure,IHaveMoved {
        result = true;
      }
     }
-    console.log(result)
     return result;
   }
 

@@ -10,6 +10,7 @@ import {Position} from '../../models/position';
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.css']
 })
+
 export class BoardComponent implements OnInit {
   bd: Board;
   selectedFigureTile: Tile;
@@ -44,7 +45,6 @@ export class BoardComponent implements OnInit {
       }
     }
   }
-
 
   private endTurn() {
     this.unselectFigure();
