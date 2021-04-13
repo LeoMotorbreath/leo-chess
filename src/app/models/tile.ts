@@ -1,8 +1,7 @@
 import {Position} from './position';
 import {AbstractFigure} from './abstract-figure';
-import {HaveMoved} from "./haveMoved";
 
-type TileHolder = AbstractFigure | HaveMoved | null
+type TileHolder = AbstractFigure | null
 
 export interface ITile {
   position: Position;

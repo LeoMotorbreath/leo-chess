@@ -3,10 +3,12 @@ import {Position} from '../position';
 import {Guris} from '../../shared/globalConsts';
 import {Board} from '../board';
 import {Tile} from '../tile';
-import {HaveMoved} from '../haveMoved';
+import {IHaveMoved} from '../haveMoved';
+import {Movable} from "../movable";
 
-export class King extends HaveMoved implements AbstractFigure {
+export class King extends Movable implements AbstractFigure,IHaveMoved {
   image: string;
+  haventMoved = true;
 
   constructor(pos: Position, color: boolean, board: Board) {
     super(board, pos, color);
@@ -31,17 +33,20 @@ export class King extends HaveMoved implements AbstractFigure {
     if ( this.kingIsReadyToCastle(dontCheckDanger)) {
       if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1,this.position.y - 1, row)) {
         def.push(row[0])
+      }
+      if(this.rookReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 8, row)) {
+        def.push(row[7])
       } else {
         console.error('invalid')
       }
-      // if(this.kingReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 8, row)) {
-      // } else {
-      //   console.error('invalid')
-      // }
     }
-    return
 
-    return []
+    return def;
+  }
+
+  move(tile: Tile) {
+    super.move(tile);
+    this.haventMoved = false;
   }
 
   private getCastlePathValid(start, end, row): boolean {
@@ -51,6 +56,7 @@ export class King extends HaveMoved implements AbstractFigure {
        result = true;
      }
     }
+    console.log(result)
     return result;
   }
 
@@ -59,8 +65,7 @@ export class King extends HaveMoved implements AbstractFigure {
   }
 
   private rookReadyToCastle(row, index) {
-    return row[index].holder && row[index].holder.color === this.color && (row[index].holder as HaveMoved).haventMoved;
+    return row[index].holder && row[index].holder.color === this.color && row[index].holder.haventMoved;
   }
-
 
 }

@@ -1,13 +1,13 @@
 import {AbstractFigure} from '../abstract-figure';
 import {Position} from '../position';
 import {Guris} from '../../shared/globalConsts';
-import {Board} from '../board';
 import {Tile} from '../tile';
 import {Movable} from '../movable';
-import {HaveMoved} from '../haveMoved';
+import { IHaveMoved } from '../haveMoved';
 
-export class Pawn extends HaveMoved implements AbstractFigure {
+export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   image: string;
+  haventMoved = true;
   private readonly direction: 1 | -1;
   constructor(pos: Position, color: boolean, board) {
     super(board, pos, color);
@@ -26,6 +26,11 @@ export class Pawn extends HaveMoved implements AbstractFigure {
       basic.push(this.checkStr(nextRow + this.direction, this.position.y));
     }
     return basic.filter(el => !!el);
+  }
+
+  move(tile: Tile) {
+    super.move(tile);
+    this.haventMoved = false;
   }
 
   check(row, y): Tile | null {

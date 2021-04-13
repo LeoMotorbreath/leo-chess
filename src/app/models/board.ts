@@ -9,39 +9,30 @@ import {Rook} from './figures/rook';
 type Row = Tile[];
 type Rows = Row[];
 
-
-
 export class Board {
   rows: Rows = [];
   whiteFigures: AbstractFigure[] = [];
   blackFigures: AbstractFigure[] = [];
   currentTurn = true;
-  isElPassantCheckNeeded: false;
-
 
   constructor() {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
   }
 
-  generateBoard(): Rows {
-    const rows = [];
-    for (let row = 0; row < 8; row++) {
-      rows[row] = [];
-      for (let ceil = 0; ceil < 8; ceil++) {
-        rows[row].push(new Tile({row, y: ceil}, Boolean((row + ceil) % 2)));
-      }
+  moveFigure(tile: Tile, figure: AbstractFigure) {
+    if (tile.holder) {
+      this.removeFigure(tile.holder);
     }
-    return rows;
+
+    this.getTileByPosition(figure.position).holder = null;
+    tile.holder = figure;
+    figure.move(tile);
+    this.endTurn();
   }
 
-  placeFiguresOnBoard(rows: Rows) {
-    for (let i = 0; i < 8; i++) {
-      this.whiteFigures.push(rows[1][i].holder = new Pawn(rows[1][i].position, true, this));
-      this.blackFigures.push(rows[6][i].holder = new Pawn(rows[6][i].position, false, this));
-      this.whiteFigures.push(rows[0][i].holder = new FList.$[FList.strFiguresRep[i]](rows[0][i].position, true, this));
-      this.blackFigures.push(rows[7][i].holder = new FList.$[FList.strFiguresRep[7 - i]](rows[7][i].position, false, this));
-    }
+  endTurn() {
+    this.currentTurn = !this.currentTurn;
   }
 
   removeFigure(figure: AbstractFigure): void {
@@ -52,21 +43,70 @@ export class Board {
     }
   }
 
-  castle(king: King, castle: Rook): void {
-    return null
+  castle(kingPos: Position, rookPos: Position): void {
+    console.log(kingPos, rookPos);
+    let row = kingPos.row
+    let newPositions = this.getNewPositionsForCastling(row, kingPos, rookPos);
+    let prevKTile = this.getTileByPosition(kingPos);
+    let prevRTile = this.getTileByPosition(rookPos);
+    this.getTileByPosition(newPositions.kp).holder = prevKTile.holder;
+    this.getTileByPosition(newPositions.rp).holder = prevRTile.holder;
+    prevKTile.holder.position = newPositions.kp;
+    prevRTile.holder.position = newPositions.rp;
+    prevKTile.holder = prevRTile.holder = null;
+    this.endTurn();
   }
 
   isPositionUnderAttack(position: Position, attackersColor: boolean): boolean {
-    const figuresToCheck =  attackersColor ? this.whiteFigures : this.blackFigures;
-    return figuresToCheck.
+    return this.getFiguresArray(attackersColor).
       map(el => el.findPseudoLegalMoves(true)).
       reduce((acc, curValue) => acc.concat(curValue)).
       reduce((acc, tile) => !!acc || this.posEqual(tile.position, position), false);
   }
 
+  getTileByPosition(pos: Position): Tile {
+    return this.rows[pos.row][pos.y];
+  }
+
   private posEqual(pos1: Position, pos2: Position): boolean {
-    if((pos1.row === pos2.row) && (pos1.y === pos2.y)) {
-    }
     return (pos1.row === pos2.row) && (pos1.y === pos2.y);
+  }
+
+  private getFiguresArray(color: boolean): AbstractFigure[] {
+    return color ? this.whiteFigures : this.blackFigures;
+  }
+
+  private generateBoard(): Rows {
+    const rows = [];
+    for (let row = 0; row < 8; row++) {
+      rows[row] = [];
+      for (let ceil = 0; ceil < 8; ceil++) {
+        rows[row].push(new Tile({row, y: ceil}, Boolean((row + ceil) % 2)));
+      }
+    }
+    return rows;
+  }
+
+  private placeFiguresOnBoard(rows: Rows) {
+    for (let i = 0; i < 8; i++) {
+      this.whiteFigures.push(rows[1][i].holder = new Pawn(rows[1][i].position, true, this));
+      this.blackFigures.push(rows[6][i].holder = new Pawn(rows[6][i].position, false, this));
+      this.whiteFigures.push(rows[0][i].holder = new FList.$[FList.strFiguresRep[i]](rows[0][i].position, true, this));
+      this.blackFigures.push(rows[7][i].holder = new FList.$[FList.strFiguresRep[7 - i]](rows[7][i].position, false, this));
+    }
+  }
+
+  private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
+    let isShort = kp.y > rp.y;
+    return {
+      kp : {
+        row,
+        y: isShort ? kp.y - 2 : kp.y + 2
+      },
+      rp : {
+        row,
+        y: isShort ? kp.y - 1 : kp.y +1
+      }
+    }
   }
 }

@@ -14,9 +14,6 @@ export class Movable {
   }
 
   move(tile: Tile): void {
-    if (tile.holder) {
-      this.board.removeFigure(tile.holder);
-    }
     this.position = tile.position;
   }
 

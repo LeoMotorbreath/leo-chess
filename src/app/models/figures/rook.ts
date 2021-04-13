@@ -5,10 +5,11 @@ import {Guris} from '../../shared/globalConsts';
 import {Board} from '../board';
 import {Tile} from '../tile';
 import {Movable} from '../movable';
-import {HaveMoved} from '../haveMoved';
+import {IHaveMoved} from "../haveMoved";
 
-export class Rook extends HaveMoved implements AbstractFigure  {
+export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
   image: string;
+  haventMoved = true;
 
   constructor(pos: Position, color: boolean, board: Board) {
     super(board, pos, color);
@@ -17,6 +18,11 @@ export class Rook extends HaveMoved implements AbstractFigure  {
 
   findPseudoLegalMoves(): Tile[] {
     return this.getStraightMoves();
+  }
+
+  move(tile: Tile) {
+    super.move(tile);
+    this.haventMoved = false;
   }
 
   private getStraightMoves(): Tile[] {

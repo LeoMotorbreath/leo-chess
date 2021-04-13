@@ -4,11 +4,6 @@ import {Tile} from '../../models/tile';
 import {AbstractFigure} from '../../models/abstract-figure';
 import {Position} from '../../models/position';
 
-export interface TurnMetadata {
-  isValid: boolean;
-  isFigureSelected: boolean;
-  isCancel: boolean;
-}
 
 @Component({
   selector: 'app-board',
@@ -16,67 +11,42 @@ export interface TurnMetadata {
   styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit {
-
-
   bd: Board;
   selectedFigureTile: Tile;
-  currentTurn = true;
   possibleMoves: Tile[] = [];
-
-  constructor() {
-
-  }
 
   ngOnInit() {
     this.bd = new Board();
   }
 
-
-  selectFigure(tile: Tile) {
+  setFigureSelected(tile: Tile) {
     this.selectedFigureTile = tile;
-    this.setPossibleMoves((this.selectedFigureTile.holder as AbstractFigure)
-      .findPseudoLegalMoves(false));
+    this.setPossibleMoves(this.selectedFigureTile.holder.findPseudoLegalMoves(false));
   }
 
-  moveFigure(newTile: Tile) {
-    this.selectedFigureTile.holder.move(newTile);
-    newTile.holder = this.selectedFigureTile.holder;
-    this.selectedFigureTile.holder = null;
+  callMoveFigure(newTile: Tile) {
+    this.bd.moveFigure(newTile, this.selectedFigureTile.holder);
     this.endTurn();
   }
 
   handleClick(tile: Tile) {
-    if (tile.holder) {
-      if (tile.holder.color === this.currentTurn) {
-        if (this.selectedFigureTile && (this.selectedFigureTile.holder === tile.holder) && this.isTileInPosibleMoves(tile)) {
-          this.unselectFigure();
+    if (tile.holder && tile.holder.color === this.bd.currentTurn && !this.isTileInPossibleMoves(tile)) {
+      this.setFigureSelected(tile);
+    } else {
+      if (this.selectedFigureTile && this.isTileInPossibleMoves(tile)) {
+        if (tile.holder && tile.holder.color === this.bd.currentTurn) {
+          this.castle(this.selectedFigureTile.position, tile.position);
         } else {
-          this.selectFigure(tile);
+          this.callMoveFigure(tile);
         }
-      } else if (this.selectedFigureTile) {
-        this.moveFigure(tile);
-      }
-    } else {
-      if (this.selectedFigureTile) {
-        this.moveFigure(tile);
-      }
-    }
-  }
-
-  newHandleClick(tile: Tile) {
-    if (tile.holder && tile.holder.color === this.currentTurn) {
-      this.selectFigure(tile);
-    } else {
-      if (this.selectedFigureTile && this.isTileInPosibleMoves(tile)) {
-        this.moveFigure(tile);
       } else {
         this.unselectFigure();
       }
     }
   }
 
+
   private endTurn() {
-    this.currentTurn = !this.currentTurn;
     this.unselectFigure();
     this.setPossibleMoves([]);
   }
@@ -87,12 +57,17 @@ export class BoardComponent implements OnInit {
     this.possibleMoves.forEach(el => el.style.border = '2px green solid');
   }
 
-  private isTileInPosibleMoves(tile: Tile): boolean {
+  private isTileInPossibleMoves(tile: Tile): boolean {
     return this.possibleMoves.some(pmove => pmove === tile);
   }
 
   private unselectFigure() {
     this.selectedFigureTile = null;
     this.setPossibleMoves([]);
+  }
+
+  private castle(kpos: Position, rpos: Position) {
+    this.bd.castle(kpos, rpos);
+    this.endTurn();
   }
 }
