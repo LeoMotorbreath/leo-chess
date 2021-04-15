@@ -17,6 +17,7 @@ export class Knight extends Movable implements AbstractFigure {
     return [
       this.check(this.position.row - 1, this.position.y + 2),
       this.check(this.position.row + 1, this.position.y + 2),
+      this.check(this.position.row - 1, this.position.y - 2),
       this.check(this.position.row + 2, this.position.y + 1),
       this.check(this.position.row + 2, this.position.y - 1),
       this.check(this.position.row + 1, this.position.y - 2),

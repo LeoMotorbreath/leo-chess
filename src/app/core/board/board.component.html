@@ -9,7 +9,11 @@
                 'border': tile.style.border
              }"
        >
+        <span style="position: absolute">
+             {{tile.position.row }}{{ tile.position.y}}
+           </span>
          <div *ngIf="tile.holder">
+
            <img class="abstract-figure"
                 [src]="tile.holder.image"
                 [ngStyle]="{'background': selectedFigureTile === tile? 'red' : ''}"

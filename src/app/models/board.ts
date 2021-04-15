@@ -14,6 +14,7 @@ export class Board {
   whiteFigures: AbstractFigure[] = [];
   blackFigures: AbstractFigure[] = [];
   currentTurn = true;
+  elPasantCheck: boolean;
 
   constructor() {
     this.rows = this.generateBoard();
@@ -24,18 +25,18 @@ export class Board {
     if (tile.holder) {
       this.removeFigure(tile.holder);
     }
-
     this.getTileByPosition(figure.position).holder = null;
     tile.holder = figure;
-    figure.move(tile);
-    this.endTurn();
+    this.endTurn(figure.move(tile));
   }
 
-  endTurn() {
+  endTurn(meta?) {
     this.currentTurn = !this.currentTurn;
+    this.elPasantCheck = meta;
   }
 
   removeFigure(figure: AbstractFigure): void {
+    this.getTileByPosition(figure.position).holder = null;
     if (figure.color) {
       this.whiteFigures = this.whiteFigures.filter(el => el !== figure);
     } else {
@@ -67,7 +68,7 @@ export class Board {
     return this.rows[pos.row][pos.y];
   }
 
-  private posEqual(pos1: Position, pos2: Position): boolean {
+  posEqual(pos1: Position, pos2: Position): boolean {
     return (pos1.row === pos2.row) && (pos1.y === pos2.y);
   }
 
@@ -91,7 +92,7 @@ export class Board {
       this.whiteFigures.push(rows[1][i].holder = new Pawn(rows[1][i].position, true, this));
       this.blackFigures.push(rows[6][i].holder = new Pawn(rows[6][i].position, false, this));
       this.whiteFigures.push(rows[0][i].holder = new FList.$[FList.strFiguresRep[i]](rows[0][i].position, true, this));
-      this.blackFigures.push(rows[7][i].holder = new FList.$[FList.strFiguresRep[7 - i]](rows[7][i].position, false, this));
+      this.blackFigures.push(rows[7][i].holder = new FList.$[FList.strFiguresRep[i]](rows[7][i].position, false, this));
     }
   }
 

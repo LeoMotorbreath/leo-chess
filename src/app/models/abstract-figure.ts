@@ -7,5 +7,5 @@ export interface AbstractFigure {
   color: boolean;
 
   findPseudoLegalMoves(dontCheckDanger?: boolean): Tile[];
-  move?(tile: Tile): void;
+  move?(tile: Tile);
 }

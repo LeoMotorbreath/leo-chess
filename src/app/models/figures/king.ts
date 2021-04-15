@@ -30,11 +30,12 @@ export class King extends Movable implements AbstractFigure,IHaveMoved {
       this.check(this.position.row - 1, this.position.y - 1),
     ].filter(el => !!el);
 
-    if ( this.kingIsReadyToCastle(dontCheckDanger)) {
-      if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1,this.position.y - 1, row)) {
+    if (this.kingIsReadyToCastle(dontCheckDanger)) {
+      if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1,this.position.y, row)) {
         def.push(row[0])
       }
-      if(this.rookReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 8, row)) {
+
+      if(this.rookReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 7, row)) {
         def.push(row[7])
       }
     }
@@ -48,13 +49,13 @@ export class King extends Movable implements AbstractFigure,IHaveMoved {
   }
 
   private getCastlePathValid(start, end, row): boolean {
-    let result = false;
     for (let i = start; i < end; i++) {
-     if(!row[i].holder && !this.board.isPositionUnderAttack(row[i].position, !this.color)) {
-       result = true;
+     console.warn(!row[i].holder)
+     if(row[i].holder || this.board.isPositionUnderAttack(row[i].position, !this.color)) {
+       return false;
      }
     }
-    return result;
+    return true;
   }
 
   private kingIsReadyToCastle(dontCheckDanger) {
