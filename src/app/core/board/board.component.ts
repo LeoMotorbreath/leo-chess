@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {Board} from '../../models/board';
 import {Tile} from '../../models/tile';
-import {AbstractFigure} from '../../models/abstract-figure';
 import {Position} from '../../models/position';
 
 
@@ -30,7 +29,21 @@ export class BoardComponent implements OnInit {
     this.endTurn();
   }
 
+  getTileBackground(tile: Tile) {
+    if (tile === this.selectedFigureTile) {
+      return 'lightgreen';
+    }
+
+    if (this.bd.kingUnderAttack && (tile === this.bd.getTileByPosition(this.bd.kingUnderAttack))) {
+      return 'red';
+    };
+  }
+
   handleClick(tile: Tile) {
+    if (this.selectedFigureTile && (this.selectedFigureTile.holder === tile.holder)) {
+      this.unselectFigure();
+      return;
+    }
     if (tile.holder && tile.holder.color === this.bd.currentTurn && !this.isTileInPossibleMoves(tile)) {
       this.setFigureSelected(tile);
     } else {
@@ -49,12 +62,15 @@ export class BoardComponent implements OnInit {
   private endTurn() {
     this.unselectFigure();
     this.setPossibleMoves([]);
+    if (this.bd.kingUnderAttack) {
+      console.log(this.bd.kingUnderAttack);
+    }
   }
 
   private setPossibleMoves(pmoves: Tile[]) {
     this.possibleMoves.forEach(el => el.style.border = 'none');
     this.possibleMoves = pmoves;
-    this.possibleMoves.forEach(el => el.style.border = '2px green solid');
+    this.possibleMoves.forEach(el => el.style.border = '1.5px green solid');
   }
 
   private isTileInPossibleMoves(tile: Tile): boolean {
@@ -70,4 +86,6 @@ export class BoardComponent implements OnInit {
     this.bd.castle(kpos, rpos);
     this.endTurn();
   }
+
+
 }

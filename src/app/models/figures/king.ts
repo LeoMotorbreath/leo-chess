@@ -6,9 +6,10 @@ import {Tile} from '../tile';
 import {IHaveMoved} from '../haveMoved';
 import {Movable} from "../movable";
 
-export class King extends Movable implements AbstractFigure,IHaveMoved {
+export class King extends Movable implements AbstractFigure, IHaveMoved {
   image: string;
   haventMoved = true;
+  readonly isKing = true;
 
   constructor(pos: Position, color: boolean, board: Board) {
     super(board, pos, color);
@@ -16,27 +17,28 @@ export class King extends Movable implements AbstractFigure,IHaveMoved {
   }
 
   findPseudoLegalMoves(dontCheckDanger: boolean): Tile[] {
-    /// if remove dont check danger got stack overflow
-    const row = (this.board.rows[this.position.row])
+    const row = (this.board.rows[this.position.row]);
 
-    const def = [
-      this.check(this.position.row + 1, this.position.y - 1),
-      this.check(this.position.row + 1, this.position.y),
-      this.check(this.position.row + 1, this.position.y + 1),
+    let def = [
       this.check(this.position.row, this.position.y - 1),
       this.check(this.position.row, this.position.y + 1),
-      this.check(this.position.row - 1, this.position.y + 1),
       this.check(this.position.row - 1, this.position.y),
+      this.check(this.position.row + 1, this.position.y),
+      this.check(this.position.row - 1, this.position.y + 1),
       this.check(this.position.row - 1, this.position.y - 1),
+      this.check(this.position.row + 1, this.position.y - 1),
+      this.check(this.position.row + 1, this.position.y + 1),
     ].filter(el => !!el);
-
+    if (!dontCheckDanger) {
+      def = def.filter(el => !this.board.isPositionUnderAttack(el.position, !this.color));
+    }
     if (this.kingIsReadyToCastle(dontCheckDanger)) {
-      if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1,this.position.y, row)) {
-        def.push(row[0])
+      if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1, this.position.y, row)) {
+        def.push(row[0]);
       }
 
-      if(this.rookReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 7, row)) {
-        def.push(row[7])
+      if (this.rookReadyToCastle(row, 7) && this.getCastlePathValid(this.position.y + 1, 7, row)) {
+        def.push(row[7]);
       }
     }
 
@@ -50,8 +52,7 @@ export class King extends Movable implements AbstractFigure,IHaveMoved {
 
   private getCastlePathValid(start, end, row): boolean {
     for (let i = start; i < end; i++) {
-     console.warn(!row[i].holder)
-     if(row[i].holder || this.board.isPositionUnderAttack(row[i].position, !this.color)) {
+     if (row[i].holder || this.board.isPositionUnderAttack(row[i].position, !this.color)) {
        return false;
      }
     }
@@ -59,7 +60,7 @@ export class King extends Movable implements AbstractFigure,IHaveMoved {
   }
 
   private kingIsReadyToCastle(dontCheckDanger) {
-    return this.haventMoved && !dontCheckDanger && !this.board.isPositionUnderAttack(this.position, !this.color);
+    return !dontCheckDanger && this.haventMoved && !this.board.isPositionUnderAttack(this.position, !this.color);
   }
 
   private rookReadyToCastle(row, index) {

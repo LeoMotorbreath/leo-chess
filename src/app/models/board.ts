@@ -15,7 +15,7 @@ export class Board {
   blackFigures: AbstractFigure[] = [];
   currentTurn = true;
   elPasantCheck: boolean;
-
+  kingUnderAttack: null | Position;
   constructor() {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
@@ -33,6 +33,7 @@ export class Board {
   endTurn(meta?) {
     this.currentTurn = !this.currentTurn;
     this.elPasantCheck = meta;
+    this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
   }
 
   removeFigure(figure: AbstractFigure): void {
@@ -45,10 +46,10 @@ export class Board {
   }
 
   castle(kingPos: Position, rookPos: Position): void {
-    let row = kingPos.row
-    let newPositions = this.getNewPositionsForCastling(row, kingPos, rookPos);
-    let prevKTile = this.getTileByPosition(kingPos);
-    let prevRTile = this.getTileByPosition(rookPos);
+    const row = kingPos.row;
+    const newPositions = this.getNewPositionsForCastling(row, kingPos, rookPos);
+    const prevKTile = this.getTileByPosition(kingPos);
+    const prevRTile = this.getTileByPosition(rookPos);
     this.getTileByPosition(newPositions.kp).holder = prevKTile.holder;
     this.getTileByPosition(newPositions.rp).holder = prevRTile.holder;
     prevKTile.holder.position = newPositions.kp;
@@ -97,7 +98,7 @@ export class Board {
   }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
-    let isShort = kp.y > rp.y;
+    const isShort = kp.y > rp.y;
     return {
       kp : {
         row,
@@ -105,8 +106,13 @@ export class Board {
       },
       rp : {
         row,
-        y: isShort ? kp.y - 1 : kp.y +1
+        y: isShort ? kp.y - 1 : kp.y + 1
       }
-    }
+    };
+  }
+
+  private isKingUnderAttack(currentTurn: boolean): null | Position {
+    const kingPosition = this.getFiguresArray(currentTurn).find(el => (el as King).isKing).position;
+    return this.isPositionUnderAttack(kingPosition, !currentTurn) ? kingPosition : null;
   }
 }
