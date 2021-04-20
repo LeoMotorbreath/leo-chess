@@ -28,13 +28,16 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
     if (this.haventMoved) {
       basic.push(this.checkStr(nextRow + this.direction, this.position.y));
     }
-    if (this.board.elPasantCheck) {
+    if (this.board.elPasantMeta && this.board.elPasantMeta.elPasantCheck) {
       basic.push(this.getElPasantMove())
     }
     return basic.filter(el => !!el);
   }
 
-  move(tile: Tile) {
+  move(tile: Tile): any {
+
+   let elPasantCheck = (this.position.row - tile.position.row) % 2 === 0;
+
     super.move(tile);
     this.haventMoved = false;
     if (tile.position.row === this.lastTileIndex) {
@@ -42,16 +45,16 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
       this.board.getTileByPosition(this.position).holder = new Queen(this.position, this.color, this.board);
       return;
     }
-    if(this.board.elPasantCheck) {
+    if(this.board.elPasantMeta) {
       let pos = {row: this.position.row - this.direction, y: this.position.y};
-      if (this.board.posEqual(pos,  (this.board.elPasantCheck as any).elPasantPosition)) {
+      if (this.board.posEqual(pos, this.board.elPasantMeta.elPasantPosition)) {
         this.board.removeFigure(this.board.getTileByPosition(pos).holder)
       }
     }
-
+    console.log(this.position, tile.position)
     return {
-      elPasantCheck: true,
-      elPasantPosition: this.position,
+      elPasantCheck,
+      elPasantPosition: tile.position,
     };
   }
 
@@ -76,10 +79,10 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   private getElPasantMove(): Tile | null {
     const r = this.position.row
     const nr = this.getNextRow();
-    if(this.board.posEqual({row: r, y: this.position.y - 1}, (this.board.elPasantCheck as any).elPasantPosition)){
+    if(this.board.posEqual({row: r, y: this.position.y - 1}, this.board.elPasantMeta.elPasantPosition)){
       return this.board.getTileByPosition({row: nr, y: this.position.y - 1});
     }
-    if(this.board.posEqual({row: r, y: this.position.y + 1}, (this.board.elPasantCheck as any).elPasantPosition)){
+    if(this.board.posEqual({row: r, y: this.position.y + 1}, this.board.elPasantMeta.elPasantPosition)){
       return this.board.getTileByPosition({row: nr, y: this.position.y + 1})
     }
   }

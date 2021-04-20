@@ -5,17 +5,20 @@ import {Position} from './position';
 import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
 import {Rook} from './figures/rook';
+import {Queen} from "./figures/queen";
 
 type Row = Tile[];
 type Rows = Row[];
-
+interface ElPasantMeta {
+  elPasantCheck: boolean,
+  elPasantPosition: Position
+}
 export class Board {
   rows: Rows = [];
-  whiteFigures: AbstractFigure[] = [];
-  blackFigures: AbstractFigure[] = [];
   currentTurn = true;
-  elPasantCheck: boolean;
+  elPasantMeta: ElPasantMeta | null;
   kingUnderAttack: null | Position;
+  figures: AbstractFigure[] = [];
   constructor() {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
@@ -32,17 +35,13 @@ export class Board {
 
   endTurn(meta?) {
     this.currentTurn = !this.currentTurn;
-    this.elPasantCheck = meta;
+    this.elPasantMeta = meta;
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
   }
 
   removeFigure(figure: AbstractFigure): void {
     this.getTileByPosition(figure.position).holder = null;
-    if (figure.color) {
-      this.whiteFigures = this.whiteFigures.filter(el => el !== figure);
-    } else {
-      this.blackFigures = this.blackFigures.filter(el => el !== figure);
-    }
+    this.figures = this.figures.filter(el => el !== figure);
   }
 
   castle(kingPos: Position, rookPos: Position): void {
@@ -74,7 +73,8 @@ export class Board {
   }
 
   private getFiguresArray(color: boolean): AbstractFigure[] {
-    return color ? this.whiteFigures : this.blackFigures;
+    this.figures.filter(figure => figure.color === color);
+    return this.figures.filter(figure => figure.color === color);
   }
 
   private generateBoard(): Rows {
@@ -90,10 +90,10 @@ export class Board {
 
   private placeFiguresOnBoard(rows: Rows) {
     for (let i = 0; i < 8; i++) {
-      this.whiteFigures.push(rows[1][i].holder = new Pawn(rows[1][i].position, true, this));
-      this.blackFigures.push(rows[6][i].holder = new Pawn(rows[6][i].position, false, this));
-      this.whiteFigures.push(rows[0][i].holder = new FList.$[FList.strFiguresRep[i]](rows[0][i].position, true, this));
-      this.blackFigures.push(rows[7][i].holder = new FList.$[FList.strFiguresRep[i]](rows[7][i].position, false, this));
+      this.figures.push(rows[1][i].holder = new Pawn(rows[1][i].position, true, this));
+      this.figures.push(rows[6][i].holder = new Pawn(rows[6][i].position, false, this));
+      this.figures.push(rows[0][i].holder = new FList.$[FList.strFiguresRep[i]](rows[0][i].position, true, this));
+      this.figures.push(rows[7][i].holder = new FList.$[FList.strFiguresRep[i]](rows[7][i].position, false, this));
     }
   }
 
