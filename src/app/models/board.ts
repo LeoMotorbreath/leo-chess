@@ -5,6 +5,8 @@ import {Position} from './position';
 import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
 import {Movable} from "./movable";
+import {Queen} from "./figures/queen";
+import {catchError} from "rxjs/operators";
 
 
 type Row = Tile[];
@@ -22,6 +24,7 @@ export class Board {
   constructor() {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
+    this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
   }
 
   moveFigure(tile: Tile, figure: AbstractFigure) {
@@ -73,7 +76,6 @@ export class Board {
   }
 
   private getFiguresArray(color: boolean): AbstractFigure[] {
-    this.figures.filter(figure => figure.color === color);
     return this.figures.filter(figure => figure.color === color);
   }
 
@@ -90,11 +92,16 @@ export class Board {
 
   private placeFiguresOnBoard(rows: Rows) {
     for (let i = 0; i < 8; i++) {
-      this.createWhiteFigure(Pawn, rows[1][i].position);
-      this.createBlackFigure(Pawn, rows[6][i].position);
-      this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
-      this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
+      // this.createWhiteFigure(Pawn, rows[1][i].position);
+      // this.createBlackFigure(Pawn, rows[6][i].position);
+      // this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
+      // this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
     }
+    this.createWhiteFigure(King, {row: 0, y: 1});
+    this.createBlackFigure(Queen, {row: 0, y: 2});
+    this.createBlackFigure(King, {row: 0, y: 3});
+
+
   }
 
   private createWhiteFigure(figureClass, position: Position) {
@@ -120,7 +127,11 @@ export class Board {
   }
 
   private isKingUnderAttack(currentTurn: boolean): null | Position {
-    const kingPosition = this.getFiguresArray(currentTurn).find(el => (el as King).isKing).position;
-    return this.isPositionUnderAttack(kingPosition, !currentTurn) ? kingPosition : null;
+    try {
+      const kingPosition = this.figures.find(el => (el as King).isKing && (el.color === currentTurn)).position;
+      return this.isPositionUnderAttack(kingPosition, !currentTurn) ? kingPosition : null;
+    } catch (error) {
+     return null
+    }
   }
 }

@@ -32,6 +32,7 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
     if (!dontCheckDanger) {
       def = def.filter(el => !this.board.isPositionUnderAttack(el.position, !this.color));
     }
+
     if (this.kingIsReadyToCastle(dontCheckDanger)) {
       if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1, this.position.y, row)) {
         def.push(row[0]);
@@ -59,12 +60,15 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
     return true;
   }
 
-  private kingIsReadyToCastle(dontCheckDanger) {
+  private kingIsReadyToCastle(dontCheckDanger: boolean): boolean {
     return !dontCheckDanger && this.haventMoved && !this.board.isPositionUnderAttack(this.position, !this.color);
   }
 
-  private rookReadyToCastle(row, index) {
+  private rookReadyToCastle(row, index: number): boolean {
     return row[index].holder && row[index].holder.color === this.color && row[index].holder.haventMoved;
   }
 
+  private getDefaultMoves(): Tile | null[] {
+    return 
+  }
 }

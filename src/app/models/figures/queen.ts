@@ -21,6 +21,9 @@ export class Queen extends Movable implements AbstractFigure  {
     return this.getStraightMoves().concat(this.getDiagonalMoves());
   }
 
+  getAttacks(): Tile[] {
+    return getStraightMoves.bind(this)(true)
+  }
   private getDiagonalMoves(): Tile[] {
     return getDiagonalMoves.bind(this)();
   }
