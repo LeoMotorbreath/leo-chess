@@ -4,8 +4,8 @@ import {Pawn} from './figures/pawn';
 import {Position} from './position';
 import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
-import {Rook} from './figures/rook';
-import {Queen} from "./figures/queen";
+import {Movable} from "./movable";
+
 
 type Row = Tile[];
 type Rows = Row[];
@@ -90,11 +90,19 @@ export class Board {
 
   private placeFiguresOnBoard(rows: Rows) {
     for (let i = 0; i < 8; i++) {
-      this.figures.push(rows[1][i].holder = new Pawn(rows[1][i].position, true, this));
-      this.figures.push(rows[6][i].holder = new Pawn(rows[6][i].position, false, this));
-      this.figures.push(rows[0][i].holder = new FList.$[FList.strFiguresRep[i]](rows[0][i].position, true, this));
-      this.figures.push(rows[7][i].holder = new FList.$[FList.strFiguresRep[i]](rows[7][i].position, false, this));
+      this.createWhiteFigure(Pawn, rows[1][i].position);
+      this.createBlackFigure(Pawn, rows[6][i].position);
+      this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
+      this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
     }
+  }
+
+  private createWhiteFigure(figureClass, position: Position) {
+    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, true, this));
+  }
+
+  private createBlackFigure(figureClass, position: Position) {
+    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, false, this));
   }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
