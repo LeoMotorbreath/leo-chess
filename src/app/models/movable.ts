@@ -17,10 +17,10 @@ export class Movable {
     this.position = tile.position;
   }
 
-  protected check(row, y): Tile | null {
+  protected check(row, y, protectionLeft?: boolean): Tile | null {
     const r = this.board.rows[row];
     if ((r && r[y])) {
-      if (!r[y].holder || r[y].holder.color !== this.color) {
+      if (!r[y].holder || protectionLeft || r[y].holder.color !== this.color) {
         return r[y];
       } else {
         return null;

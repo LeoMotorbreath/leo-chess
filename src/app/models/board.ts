@@ -75,6 +75,12 @@ export class Board {
     return (pos1.row === pos2.row) && (pos1.y === pos2.y);
   }
 
+  getAttacks(attackerColor: boolean): Tile[] {
+    return this.getFiguresArray(attackerColor)
+      .map(af => af.getAttacks())
+      .reduce((acc, value) => acc.concat(value));
+  }
+
   private getFiguresArray(color: boolean): AbstractFigure[] {
     return this.figures.filter(figure => figure.color === color);
   }
@@ -92,14 +98,15 @@ export class Board {
 
   private placeFiguresOnBoard(rows: Rows) {
     for (let i = 0; i < 8; i++) {
-      // this.createWhiteFigure(Pawn, rows[1][i].position);
-      // this.createBlackFigure(Pawn, rows[6][i].position);
-      // this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
-      // this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
+      this.createWhiteFigure(Pawn, rows[1][i].position);
+      this.createBlackFigure(Pawn, rows[6][i].position);
+      this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
+      this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
     }
-    this.createWhiteFigure(King, {row: 0, y: 1});
-    this.createBlackFigure(Queen, {row: 0, y: 2});
-    this.createBlackFigure(King, {row: 0, y: 3});
+    // this.createWhiteFigure(King, {row: 0, y: 1});
+    // this.createBlackFigure(Queen, {row: 0, y: 2});
+    // this.createBlackFigure(Queen, {row: 0, y: 3});
+    // this.createBlackFigure(King, {row: 0, y: 4});
 
 
   }

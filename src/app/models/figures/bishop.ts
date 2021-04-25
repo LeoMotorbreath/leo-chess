@@ -16,10 +16,16 @@ export class Bishop extends Movable implements AbstractFigure  {
   }
 
   findPseudoLegalMoves(): Tile[] {
-    return this.getDiagonalMoves();
+    return this.getDiagonalMoves(false);
   }
 
-  private getDiagonalMoves() {
-    return getDiagonalMoves.bind(this)();
+  getAttacks(): Tile[] {
+    return this.getDiagonalMoves(true);
   }
+
+  private getDiagonalMoves(protection: boolean) {
+    return getDiagonalMoves.bind(this)(protection);
+  }
+
+
 }

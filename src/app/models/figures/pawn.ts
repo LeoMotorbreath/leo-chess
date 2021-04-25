@@ -11,6 +11,7 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   haventMoved = true;
   private readonly lastTileIndex: number;
   private readonly direction: 1 | -1;
+
   constructor(pos: Position, color: boolean, board) {
     super(board, pos, color);
     this.image = color ? Guris.svgw + Guris.pawn : Guris.svgb + Guris.pawn;
@@ -19,19 +20,15 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   }
 
   findPseudoLegalMoves(): Tile[] {
-    const nextRow = this.getNextRow();
-    const basic = [
-      this.check(nextRow, this.position.y - 1),
-      this.checkStr(nextRow, this.position.y),
-      this.check(nextRow, this.position.y + 1)
-    ];
-    if (this.haventMoved) {
-      basic.push(this.checkStr(nextRow + this.direction, this.position.y));
-    }
+    const basic = this.getBasicMoves( false);
     if (this.board.elPasantMeta && this.board.elPasantMeta.elPasantCheck) {
       basic.push(this.getElPasantMove())
     }
-    return basic.filter(el => !!el);
+    return basic;
+  }
+
+  getAttacks(): Tile[] {
+    return this.getBasicMoves(true);
   }
 
   move(tile: Tile): any {
@@ -45,23 +42,24 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
       this.board.getTileByPosition(this.position).holder = new Queen(this.position, this.color, this.board);
       return;
     }
+
     if(this.board.elPasantMeta) {
       let pos = {row: this.position.row - this.direction, y: this.position.y};
       if (this.board.posEqual(pos, this.board.elPasantMeta.elPasantPosition)) {
         this.board.removeFigure(this.board.getTileByPosition(pos).holder)
       }
     }
-    console.log(this.position, tile.position)
+
     return {
       elPasantCheck,
       elPasantPosition: tile.position,
     };
   }
 
-  check(row, y): Tile | null {
+  check(row, y, protection): Tile | null {
     const r = this.board.rows[row];
     if (r && r[y]) {
-      if (r[y].holder && r[y].holder.color !== this.color) {
+      if (r[y].holder && (r[y].holder.color !== this.color || protection)) {
         return r[y];
       } else {
         return null;
@@ -90,4 +88,18 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   private getNextRow(): number {
     return this.position.row + this.direction;
   }
+
+  private getBasicMoves( protection: boolean) {
+    const nextRow = this.getNextRow();
+    const basic =  [
+      this.check(nextRow, this.position.y - 1, protection),
+      this.check(nextRow, this.position.y + 1, protection),
+      this.checkStr(nextRow, this.position.y),
+    ];
+    if (this.haventMoved && !protection) {
+      basic.push(this.checkStr(nextRow + this.direction, this.position.y));
+    }
+    return basic.filter(el => !!el);
+  }
+
 }

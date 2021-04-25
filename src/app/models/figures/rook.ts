@@ -17,7 +17,11 @@ export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
   }
 
   findPseudoLegalMoves(): Tile[] {
-    return this.getStraightMoves();
+    return this.getStraightMoves(false);
+  }
+
+  getAttacks(): Tile[] {
+    return this.getStraightMoves(true);
   }
 
   move(tile: Tile) {
@@ -25,7 +29,9 @@ export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
     this.haventMoved = false;
   }
 
-  private getStraightMoves(): Tile[] {
-    return getStraightMoves.bind(this)();
+  private getStraightMoves(protection:boolean): Tile[] {
+    return getStraightMoves.bind(this)(protection);
   }
+
+
 }

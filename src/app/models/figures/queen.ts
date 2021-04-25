@@ -18,17 +18,18 @@ export class Queen extends Movable implements AbstractFigure  {
   }
 
   findPseudoLegalMoves(): Tile[] {
-    return this.getStraightMoves().concat(this.getDiagonalMoves());
+    return this.getStraightMoves(false).concat(this.getDiagonalMoves(false));
   }
 
   getAttacks(): Tile[] {
-    return getStraightMoves.bind(this)(true)
-  }
-  private getDiagonalMoves(): Tile[] {
-    return getDiagonalMoves.bind(this)();
+    return this.getStraightMoves(true).concat(this.getDiagonalMoves(true));
   }
 
-  private getStraightMoves(): Tile[] {
-    return getStraightMoves.bind(this)();
+  private getDiagonalMoves(protection: boolean): Tile[] {
+    return getDiagonalMoves.bind(this)(protection);
+  }
+
+  private getStraightMoves(protection: boolean): Tile[] {
+    return getStraightMoves.bind(this)(protection);
   }
 }

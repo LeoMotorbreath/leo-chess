@@ -26,5 +26,18 @@ export class Knight extends Movable implements AbstractFigure {
     ].filter(el => !!el);
   }
 
+  getAttacks(): Tile[] {
+    return [
+      this.check(this.position.row - 1, this.position.y + 2, true),
+      this.check(this.position.row + 1, this.position.y + 2, true),
+      this.check(this.position.row - 1, this.position.y - 2, true),
+      this.check(this.position.row + 2, this.position.y + 1, true),
+      this.check(this.position.row + 2, this.position.y - 1, true),
+      this.check(this.position.row + 1, this.position.y - 2, true),
+      this.check(this.position.row - 2, this.position.y - 1, true),
+      this.check(this.position.row - 2, this.position.y + 1, true),
+    ].filter(el => !!el);
+  }
+
 }
 
