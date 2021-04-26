@@ -1,10 +1,10 @@
 import {AbstractFigure} from '../abstract-figure';
 import {Position} from '../position';
 import {Guris} from '../../shared/globalConsts';
-import {Board} from '../board';
+import {Board, Row} from '../board';
 import {Tile} from '../tile';
 import {IHaveMoved} from '../haveMoved';
-import {Movable} from "../movable";
+import {Movable} from '../movable';
 
 export class King extends Movable implements AbstractFigure, IHaveMoved {
   image: string;
@@ -18,8 +18,7 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
 
   findPseudoLegalMoves(dontCheckDanger: boolean): Tile[] {
     const row = (this.board.rows[this.position.row]);
-
-    const defaultMoves = this.filterProtected(this.getDefaultMoves(false))
+    const defaultMoves = this.filterProtected(this.getDefaultMoves(false));
     if (this.kingIsReadyToCastle(dontCheckDanger)) {
       if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1, this.position.y, row)) {
         defaultMoves.push(row[0]);
@@ -42,9 +41,9 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
     this.haventMoved = false;
   }
 
-  private getCastlePathValid(start, end, row): boolean {
+  private getCastlePathValid(start, end, row: Row): boolean {
     for (let i = start; i < end; i++) {
-     if (row[i].holder || this.board.isPositionUnderAttack(row[i].position, !this.color)) {
+     if (row[i].holder || this.board.isTileUnderAttack(row[i], !this.color)) {
        return false;
      }
     }
@@ -52,7 +51,7 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
   }
 
   private kingIsReadyToCastle(dontCheckDanger: boolean): boolean {
-    return !dontCheckDanger && this.haventMoved && !this.board.isPositionUnderAttack(this.position, !this.color);
+    return !dontCheckDanger && this.haventMoved && !this.board.isTileUnderAttack(this.board.getTileByPosition(this.position), !this.color);
   }
 
   private rookReadyToCastle(row, index: number): boolean {
@@ -63,12 +62,10 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
     const attacksHash = this.board
       .getAttacks(!this.color)
       .reduce((acc, value) => {
-        acc[value.id] = value
-        return acc
+        acc[value.id] = value;
+        return acc;
       }, {});
-    let x =  tiles.filter(tile => !attacksHash[tile.id]);
-    console.warn(x)
-    return x
+    return tiles.filter(tile => !attacksHash[tile.id]);
   }
 
   private getDefaultMoves(protection: boolean): Tile[] {

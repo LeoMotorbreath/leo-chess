@@ -15,14 +15,14 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   constructor(pos: Position, color: boolean, board) {
     super(board, pos, color);
     this.image = color ? Guris.svgw + Guris.pawn : Guris.svgb + Guris.pawn;
-    this.direction = color ? 1 : -1
+    this.direction = color ? 1 : -1;
     this.lastTileIndex = color ? 7 : 0;
   }
 
   findPseudoLegalMoves(): Tile[] {
     const basic = this.getBasicMoves( false);
     if (this.board.elPasantMeta && this.board.elPasantMeta.elPasantCheck) {
-      basic.push(this.getElPasantMove())
+      basic.push(this.getElPasantMove());
     }
     return basic;
   }
@@ -32,21 +32,19 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   }
 
   move(tile: Tile): any {
-
-   let elPasantCheck = (this.position.row - tile.position.row) % 2 === 0;
-
+    const elPasantCheck = (this.position.row - tile.position.row) % 2 === 0;
     super.move(tile);
     this.haventMoved = false;
     if (tile.position.row === this.lastTileIndex) {
-      this.board.removeFigure(this)
-      this.board.getTileByPosition(this.position).holder = new Queen(this.position, this.color, this.board);
+      this.board.removeFigure(this);
+      this.color ? this.board.createWhiteFigure(Queen, this.position) : this.board.createBlackFigure(Queen, this.position);
       return;
     }
 
-    if(this.board.elPasantMeta) {
-      let pos = {row: this.position.row - this.direction, y: this.position.y};
+    if (this.board.elPasantMeta) {
+      const pos = {row: this.position.row - this.direction, y: this.position.y};
       if (this.board.posEqual(pos, this.board.elPasantMeta.elPasantPosition)) {
-        this.board.removeFigure(this.board.getTileByPosition(pos).holder)
+        this.board.removeFigure(this.board.getTileByPosition(pos).holder);
       }
     }
 
@@ -75,13 +73,13 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   }
 
   private getElPasantMove(): Tile | null {
-    const r = this.position.row
+    const r = this.position.row;
     const nr = this.getNextRow();
-    if(this.board.posEqual({row: r, y: this.position.y - 1}, this.board.elPasantMeta.elPasantPosition)){
+    if (this.board.posEqual({row: r, y: this.position.y - 1}, this.board.elPasantMeta.elPasantPosition)) {
       return this.board.getTileByPosition({row: nr, y: this.position.y - 1});
     }
-    if(this.board.posEqual({row: r, y: this.position.y + 1}, this.board.elPasantMeta.elPasantPosition)){
-      return this.board.getTileByPosition({row: nr, y: this.position.y + 1})
+    if (this.board.posEqual({row: r, y: this.position.y + 1}, this.board.elPasantMeta.elPasantPosition)) {
+      return this.board.getTileByPosition({row: nr, y: this.position.y + 1});
     }
   }
 
@@ -94,10 +92,12 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
     const basic =  [
       this.check(nextRow, this.position.y - 1, protection),
       this.check(nextRow, this.position.y + 1, protection),
-      this.checkStr(nextRow, this.position.y),
     ];
-    if (this.haventMoved && !protection) {
-      basic.push(this.checkStr(nextRow + this.direction, this.position.y));
+    if (!protection) {
+      basic.push(this.checkStr(nextRow, this.position.y));
+      if (this.haventMoved) {
+        basic.push(this.checkStr(nextRow + this.direction, this.position.y));
+      }
     }
     return basic.filter(el => !!el);
   }

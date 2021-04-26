@@ -11,8 +11,9 @@ const gc = {
 if (environment.production) {
   enableProdMode();
 }
-
-
+Array.prototype.flat = function<U>(): U[] {
+  return this.reduce((acc, value) => acc.concat(value));
+};
 
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.error(err));

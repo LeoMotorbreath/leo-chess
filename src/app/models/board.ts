@@ -9,7 +9,7 @@ import {Queen} from "./figures/queen";
 import {catchError} from "rxjs/operators";
 
 
-type Row = Tile[];
+export type Row = Tile[];
 type Rows = Row[];
 interface ElPasantMeta {
   elPasantCheck: boolean,
@@ -67,6 +67,14 @@ export class Board {
       reduce((acc, tile) => !!acc || this.posEqual(tile.position, position), false);
   }
 
+  isTileUnderAttack(tile: Tile, attackersColor: boolean): boolean {
+     return this
+       .getFiguresArray(attackersColor)
+       .map(el => el.getAttacks())
+       .flat<Tile>()
+       .some(attackedTile => attackedTile.id === tile.id);
+  }
+
   getTileByPosition(pos: Position): Tile {
     return this.rows[pos.row][pos.y];
   }
@@ -111,11 +119,11 @@ export class Board {
 
   }
 
-  private createWhiteFigure(figureClass, position: Position) {
+  createWhiteFigure(figureClass, position: Position) {
     this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, true, this));
   }
 
-  private createBlackFigure(figureClass, position: Position) {
+  createBlackFigure(figureClass, position: Position) {
     this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, false, this));
   }
 
@@ -138,7 +146,7 @@ export class Board {
       const kingPosition = this.figures.find(el => (el as King).isKing && (el.color === currentTurn)).position;
       return this.isPositionUnderAttack(kingPosition, !currentTurn) ? kingPosition : null;
     } catch (error) {
-     return null
+     return null;
     }
   }
 }

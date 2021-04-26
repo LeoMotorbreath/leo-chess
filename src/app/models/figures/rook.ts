@@ -29,7 +29,7 @@ export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
     this.haventMoved = false;
   }
 
-  private getStraightMoves(protection:boolean): Tile[] {
+  private getStraightMoves(protection: boolean): Tile[] {
     return getStraightMoves.bind(this)(protection);
   }
 
