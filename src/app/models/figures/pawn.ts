@@ -3,7 +3,7 @@ import {Position} from '../position';
 import {Guris} from '../../shared/globalConsts';
 import {Tile} from '../tile';
 import {Movable} from '../movable';
-import { IHaveMoved } from '../haveMoved';
+import {IHaveMoved} from '../haveMoved';
 import {Queen} from "./queen";
 
 export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
@@ -94,8 +94,9 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
       this.check(nextRow, this.position.y + 1, protection),
     ];
     if (!protection) {
-      basic.push(this.checkStr(nextRow, this.position.y));
-      if (this.haventMoved) {
+      const check = this.checkStr(nextRow, this.position.y)
+      basic.push(check);
+      if (this.haventMoved && check) {
         basic.push(this.checkStr(nextRow + this.direction, this.position.y));
       }
     }

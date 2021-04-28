@@ -18,6 +18,9 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
 
   findPseudoLegalMoves(dontCheckDanger: boolean): Tile[] {
     const row = (this.board.rows[this.position.row]);
+    const x = this.board.getTileByPosition(this.position)
+    const f = x.holder;
+    x.holder = null;
     const defaultMoves = this.filterProtected(this.getDefaultMoves(false));
     if (this.kingIsReadyToCastle(dontCheckDanger)) {
       if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1, this.position.y, row)) {
@@ -28,6 +31,7 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
         defaultMoves.push(row[7]);
       }
     }
+    x.holder = f;
 
     return defaultMoves;
   }

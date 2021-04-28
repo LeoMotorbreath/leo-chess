@@ -21,6 +21,7 @@ export class Board {
   elPasantMeta: ElPasantMeta | null;
   kingUnderAttack: null | Position;
   figures: AbstractFigure[] = [];
+
   constructor() {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
@@ -40,6 +41,36 @@ export class Board {
     this.currentTurn = !this.currentTurn;
     this.elPasantMeta = meta;
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
+  }
+
+  isMoveCauseAttackToKing(defPos: Position, color: boolean) {
+    const kingTile = this.getTileByPosition(this.getFiguresArray(color).find((figure: King) => figure.isKing).position);
+    const defTile = this.getTileByPosition(defPos);
+    const figgure = defTile.holder;
+    defTile.holder = null;
+    const result = this.isTileUnderAttack(kingTile, !color);
+    defTile.holder = figgure;
+    return result;
+  }
+
+  isKingUnderAttackAfterMove(newPos: Position,prevPos: Position, color: boolean) {
+    const prevTile = this.getTileByPosition(prevPos);
+    const newTile = this.getTileByPosition(newPos);
+    const prevTileFigure = prevTile.holder;
+    const newTileFigure = newTile.holder;
+
+    if (newTileFigure) {
+      this.removeFigure(newTileFigure)
+    }
+    prevTile.holder = null;
+    const result = this.isPositionUnderAttack(this.getFiguresArray(color).find((figure: King) => figure.isKing).position, !color)
+    prevTile.holder = prevTileFigure;
+
+    if (newTileFigure) {
+      this.placeFigure(newTileFigure)
+    }
+
+    return result;
   }
 
   removeFigure(figure: AbstractFigure): void {
@@ -62,16 +93,15 @@ export class Board {
 
   isPositionUnderAttack(position: Position, attackersColor: boolean): boolean {
     return this.getFiguresArray(attackersColor).
-      map(el => el.findPseudoLegalMoves(true)).
+      map((el) => el.getAttacks()).
       reduce((acc, curValue) => acc.concat(curValue)).
       reduce((acc, tile) => !!acc || this.posEqual(tile.position, position), false);
   }
 
   isTileUnderAttack(tile: Tile, attackersColor: boolean): boolean {
-     return this
-       .getFiguresArray(attackersColor)
-       .map(el => el.getAttacks())
-       .flat<Tile>()
+     return this.getFiguresArray(attackersColor)
+       .map(af => af.getAttacks())
+       .reduce((acc, value) => acc.concat(value))
        .some(attackedTile => attackedTile.id === tile.id);
   }
 
@@ -85,8 +115,20 @@ export class Board {
 
   getAttacks(attackerColor: boolean): Tile[] {
     return this.getFiguresArray(attackerColor)
-      .map(af => af.getAttacks())
+      .map((af: AbstractFigure) => af.getAttacks())
       .reduce((acc, value) => acc.concat(value));
+  }
+
+  createWhiteFigure(figureClass, position: Position) {
+    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, true, this));
+  }
+
+  createBlackFigure(figureClass, position: Position) {
+    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, false, this));
+  }
+
+  placeFigure(figure: AbstractFigure) {
+    this.figures.push(this.getTileByPosition(figure.position).holder = figure)
   }
 
   private getFiguresArray(color: boolean): AbstractFigure[] {
@@ -105,26 +147,17 @@ export class Board {
   }
 
   private placeFiguresOnBoard(rows: Rows) {
-    for (let i = 0; i < 8; i++) {
-      this.createWhiteFigure(Pawn, rows[1][i].position);
-      this.createBlackFigure(Pawn, rows[6][i].position);
-      this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
-      this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
-    }
-    // this.createWhiteFigure(King, {row: 0, y: 1});
-    // this.createBlackFigure(Queen, {row: 0, y: 2});
+    // for (let i = 0; i < 8; i++) {
+    //   this.createWhiteFigure(Pawn, rows[1][i].position);
+    //   this.createBlackFigure(Pawn, rows[6][i].position);
+    //   this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
+    //   this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
+    // }
+    this.createWhiteFigure(King, {row: 0, y: 2});
+    this.createWhiteFigure(Queen, {row:0, y:3})
+    this.createBlackFigure(Queen, {row: 0, y: 4});
     // this.createBlackFigure(Queen, {row: 0, y: 3});
-    // this.createBlackFigure(King, {row: 0, y: 4});
-
-
-  }
-
-  createWhiteFigure(figureClass, position: Position) {
-    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, true, this));
-  }
-
-  createBlackFigure(figureClass, position: Position) {
-    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, false, this));
+    this.createBlackFigure(King, {row: 0, y: 5});
   }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {

@@ -70,7 +70,7 @@ export class BoardComponent implements OnInit {
   private setPossibleMoves(pmoves: Tile[]) {
     this.possibleMoves.forEach(el => el.style.border = 'none');
     this.possibleMoves = pmoves;
-    this.possibleMoves.forEach(el => el.style.border = '1.5px green solid');
+    this.possibleMoves.forEach(el => el.style.border = '2px green solid');
   }
 
   private isTileInPossibleMoves(tile: Tile): boolean {
