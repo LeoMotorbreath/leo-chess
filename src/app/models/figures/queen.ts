@@ -12,8 +12,8 @@ import {getStraightMoves} from '../straightMovable';
 export class Queen extends Movable implements AbstractFigure  {
   image: string;
 
-  constructor(pos: Position, color: boolean, board: Board) {
-    super(board, pos, color);
+  constructor(tile: Tile, color: boolean, board: Board) {
+    super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.queen : Guris.svgb + Guris.queen;
   }
 
@@ -21,7 +21,7 @@ export class Queen extends Movable implements AbstractFigure  {
     return this
       .getStraightMoves(false)
       .concat(this.getDiagonalMoves(false))
-      .filter(tile => !this.board.isKingUnderAttackAfterMove(tile.position, this.position, this.color));
+      // .filter(tile => !this.board.isKingUnderAttackAfterMove(tile.position, this.position, this.color));
   }
 
   getAttacks(): Tile[] {

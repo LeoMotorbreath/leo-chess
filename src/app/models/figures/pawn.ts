@@ -12,8 +12,8 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   private readonly lastTileIndex: number;
   private readonly direction: 1 | -1;
 
-  constructor(pos: Position, color: boolean, board) {
-    super(board, pos, color);
+  constructor(tile: Tile, color: boolean, board) {
+    super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.pawn : Guris.svgb + Guris.pawn;
     this.direction = color ? 1 : -1;
     this.lastTileIndex = color ? 7 : 0;
@@ -37,7 +37,7 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
     this.haventMoved = false;
     if (tile.position.row === this.lastTileIndex) {
       this.board.removeFigure(this);
-      this.color ? this.board.createWhiteFigure(Queen, this.position) : this.board.createBlackFigure(Queen, this.position);
+      this.color ? this.board.createWhiteFigure(Queen, this.tile) : this.board.createBlackFigure(Queen, this.tile);
       return;
     }
 

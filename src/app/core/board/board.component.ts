@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {Board} from '../../models/board';
 import {Tile} from '../../models/tile';
 import {Position} from '../../models/position';
+import {AbstractFigure} from "../../models/abstract-figure";
 
 
 @Component({
@@ -21,7 +22,12 @@ export class BoardComponent implements OnInit {
 
   setFigureSelected(tile: Tile) {
       this.selectedFigureTile = tile;
-      this.setPossibleMoves(this.selectedFigureTile.holder.findPseudoLegalMoves(false).filter(el => !!el));
+      const result = tile.holder
+        .findPseudoLegalMoves(false)
+        .filter(el => !!el)
+        .filter(newTile => !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(tile.position, tile.holder.position, tile.holder.color));
+
+        this.setPossibleMoves(result);
   }
 
   callMoveFigure(newTile: Tile) {

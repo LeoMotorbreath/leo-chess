@@ -11,8 +11,8 @@ export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
   image: string;
   haventMoved = true;
 
-  constructor(pos: Position, color: boolean, board: Board) {
-    super(board, pos, color);
+  constructor(tile: Tile, color: boolean, board: Board) {
+    super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.rook : Guris.svgb + Guris.rook;
   }
 

@@ -11,16 +11,16 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
   haventMoved = true;
   readonly isKing = true;
 
-  constructor(pos: Position, color: boolean, board: Board) {
-    super(board, pos, color);
+  constructor(tile: Tile, color: boolean, board: Board) {
+    super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.king : Guris.svgb + Guris.king ;
   }
 
   findPseudoLegalMoves(dontCheckDanger: boolean): Tile[] {
     const row = (this.board.rows[this.position.row]);
-    const x = this.board.getTileByPosition(this.position)
-    const f = x.holder;
-    x.holder = null;
+    const kingTIle = this.tile
+    const king = kingTIle.holder;
+    kingTIle.holder = null;
     const defaultMoves = this.filterProtected(this.getDefaultMoves(false));
     if (this.kingIsReadyToCastle(dontCheckDanger)) {
       if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1, this.position.y, row)) {
@@ -31,8 +31,7 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
         defaultMoves.push(row[7]);
       }
     }
-    x.holder = f;
-
+    kingTIle.holder = king;
     return defaultMoves;
   }
 

@@ -4,10 +4,6 @@ import {Pawn} from './figures/pawn';
 import {Position} from './position';
 import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
-import {Movable} from "./movable";
-import {Queen} from "./figures/queen";
-import {catchError} from "rxjs/operators";
-
 
 export type Row = Tile[];
 type Rows = Row[];
@@ -17,10 +13,10 @@ interface ElPasantMeta {
 }
 export class Board {
   rows: Rows = [];
-  currentTurn = true;
-  elPasantMeta: ElPasantMeta | null;
-  kingUnderAttack: null | Position;
   figures: AbstractFigure[] = [];
+  elPasantMeta: ElPasantMeta | null;
+  kingUnderAttack: Position | null;
+  currentTurn = true;
 
   constructor() {
     this.rows = this.generateBoard();
@@ -29,10 +25,8 @@ export class Board {
   }
 
   moveFigure(tile: Tile, figure: AbstractFigure) {
-    if (tile.holder) {
-      this.removeFigure(tile.holder);
-    }
-    this.getTileByPosition(figure.position).holder = null;
+    this.removeFigure((tile.holder as AbstractFigure));
+    figure.tile.holder = null;
     tile.holder = figure;
     this.endTurn(figure.move(tile));
   }
@@ -58,14 +52,10 @@ export class Board {
     const newTile = this.getTileByPosition(newPos);
     const prevTileFigure = prevTile.holder;
     const newTileFigure = newTile.holder;
-
-    if (newTileFigure) {
-      this.removeFigure(newTileFigure)
-    }
+    this.removeFigure(newTileFigure)
     prevTile.holder = null;
     const result = this.isPositionUnderAttack(this.getFiguresArray(color).find((figure: King) => figure.isKing).position, !color)
     prevTile.holder = prevTileFigure;
-
     if (newTileFigure) {
       this.placeFigure(newTileFigure)
     }
@@ -74,7 +64,8 @@ export class Board {
   }
 
   removeFigure(figure: AbstractFigure): void {
-    this.getTileByPosition(figure.position).holder = null;
+    if(!figure) return;
+    figure.tile.holder = null;
     this.figures = this.figures.filter(el => el !== figure);
   }
 
@@ -85,8 +76,6 @@ export class Board {
     const prevRTile = this.getTileByPosition(rookPos);
     this.getTileByPosition(newPositions.kp).holder = prevKTile.holder;
     this.getTileByPosition(newPositions.rp).holder = prevRTile.holder;
-    prevKTile.holder.position = newPositions.kp;
-    prevRTile.holder.position = newPositions.rp;
     prevKTile.holder = prevRTile.holder = null;
     this.endTurn();
   }
@@ -119,12 +108,12 @@ export class Board {
       .reduce((acc, value) => acc.concat(value));
   }
 
-  createWhiteFigure(figureClass, position: Position) {
-    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, true, this));
+  createWhiteFigure(figureClass, tile: Tile) {
+    this.figures.push(new figureClass(tile, true, this));
   }
 
-  createBlackFigure(figureClass, position: Position) {
-    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, false, this));
+  createBlackFigure(figureClass, tile: Tile) {
+    this.figures.push(new figureClass(tile, false, this));
   }
 
   placeFigure(figure: AbstractFigure) {
@@ -147,17 +136,12 @@ export class Board {
   }
 
   private placeFiguresOnBoard(rows: Rows) {
-    // for (let i = 0; i < 8; i++) {
-    //   this.createWhiteFigure(Pawn, rows[1][i].position);
-    //   this.createBlackFigure(Pawn, rows[6][i].position);
-    //   this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
-    //   this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
-    // }
-    this.createWhiteFigure(King, {row: 0, y: 2});
-    this.createWhiteFigure(Queen, {row:0, y:3})
-    this.createBlackFigure(Queen, {row: 0, y: 4});
-    // this.createBlackFigure(Queen, {row: 0, y: 3});
-    this.createBlackFigure(King, {row: 0, y: 5});
+    for (let i = 0; i < 8; i++) {
+      this.createWhiteFigure(Pawn, rows[1][i]);
+      this.createBlackFigure(Pawn, rows[6][i]);
+      this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i]);
+      this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i]);
+    }
   }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
@@ -179,7 +163,7 @@ export class Board {
       const kingPosition = this.figures.find(el => (el as King).isKing && (el.color === currentTurn)).position;
       return this.isPositionUnderAttack(kingPosition, !currentTurn) ? kingPosition : null;
     } catch (error) {
-     return null;
+      return null;
     }
   }
 }

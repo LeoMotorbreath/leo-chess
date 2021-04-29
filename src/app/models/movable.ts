@@ -1,20 +1,28 @@
 import {Position} from './position';
 import {Board} from './board';
 import {Tile} from './tile';
+import {AbstractFigure} from "./abstract-figure";
 
 export class Movable {
-  position: Position;
+
   board: Board;
   color: boolean;
+  tile: Tile;
+  get position() {
+    return this.tile.position
+  };
 
-  constructor(board: Board, position, color: boolean) {
+
+
+  constructor(board: Board, tile: Tile, color: boolean) {
     this.board = board;
-    this.position = position;
+    this.tile = tile;
     this.color = color;
+    this.tile.holder = (this as unknown as AbstractFigure);
   }
 
   move(tile: Tile): void {
-    this.position = tile.position;
+    this.tile = tile;
   }
 
   protected check(row, y, protectionLeft?: boolean): Tile | null {
