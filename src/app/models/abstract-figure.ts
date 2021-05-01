@@ -11,5 +11,5 @@ export interface AbstractFigure {
 
   findPseudoLegalMoves(dontCheckDanger?: boolean): Tile[];
   getAttacks(): Tile[];
-  move?(tile: Tile);
+  move(tile: Tile);
 }

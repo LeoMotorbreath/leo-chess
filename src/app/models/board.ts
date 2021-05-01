@@ -38,7 +38,7 @@ export class Board {
   }
 
   isMoveCauseAttackToKing(defPos: Position, color: boolean) {
-    const kingTile = this.getTileByPosition(this.getFiguresArray(color).find((figure: King) => figure.isKing).position);
+    const kingTile = this.getFiguresArray(color).find((figure: King) => figure.isKing).tile
     const defTile = this.getTileByPosition(defPos);
     const figgure = defTile.holder;
     defTile.holder = null;
@@ -47,19 +47,19 @@ export class Board {
     return result;
   }
 
-  isKingUnderAttackAfterMove(newPos: Position,prevPos: Position, color: boolean) {
-    const prevTile = this.getTileByPosition(prevPos);
+  isKingUnderAttackAfterMove(newPos: Position, prevPos: Position, color: boolean) {
     const newTile = this.getTileByPosition(newPos);
+    const prevTile = this.getTileByPosition(prevPos);
     const prevTileFigure = prevTile.holder;
     const newTileFigure = newTile.holder;
     this.removeFigure(newTileFigure)
     prevTile.holder = null;
+    newTile.holder = prevTileFigure;
     const result = this.isPositionUnderAttack(this.getFiguresArray(color).find((figure: King) => figure.isKing).position, !color)
     prevTile.holder = prevTileFigure;
-    if (newTileFigure) {
-      this.placeFigure(newTileFigure)
-    }
-
+    newTile.holder = null;
+    this.placeFigure(newTileFigure);
+    console.log(this.getTileByPosition(newPos).id + ":" + result);
     return result;
   }
 
@@ -117,7 +117,7 @@ export class Board {
   }
 
   placeFigure(figure: AbstractFigure) {
-    this.figures.push(this.getTileByPosition(figure.position).holder = figure)
+    if(figure) this.figures.push(this.getTileByPosition(figure.position).holder = figure)
   }
 
   private getFiguresArray(color: boolean): AbstractFigure[] {

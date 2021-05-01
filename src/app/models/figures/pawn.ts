@@ -94,7 +94,7 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
       this.check(nextRow, this.position.y + 1, protection),
     ];
     if (!protection) {
-      const check = this.checkStr(nextRow, this.position.y)
+      const check = this.checkStr(nextRow, this.position.y);
       basic.push(check);
       if (this.haventMoved && check) {
         basic.push(this.checkStr(nextRow + this.direction, this.position.y));

@@ -25,7 +25,9 @@ export class BoardComponent implements OnInit {
       const result = tile.holder
         .findPseudoLegalMoves(false)
         .filter(el => !!el)
-        .filter(newTile => !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(tile.position, tile.holder.position, tile.holder.color));
+        .filter(newTile =>
+          !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(newTile.position, tile.holder.position, tile.holder.color)
+        );
 
         this.setPossibleMoves(result);
   }
@@ -68,9 +70,6 @@ export class BoardComponent implements OnInit {
   private endTurn() {
     this.unselectFigure();
     this.setPossibleMoves([]);
-    if (this.bd.kingUnderAttack) {
-      console.log(this.bd.kingUnderAttack);
-    }
   }
 
   private setPossibleMoves(pmoves: Tile[]) {
