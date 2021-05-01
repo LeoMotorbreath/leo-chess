@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {Board} from '../../models/board';
 import {Tile} from '../../models/tile';
 import {Position} from '../../models/position';
+import {AbstractFigure} from "../../models/abstract-figure";
 
 
 @Component({
@@ -20,8 +21,15 @@ export class BoardComponent implements OnInit {
   }
 
   setFigureSelected(tile: Tile) {
-    this.selectedFigureTile = tile;
-    this.setPossibleMoves(this.selectedFigureTile.holder.findPseudoLegalMoves(false));
+      this.selectedFigureTile = tile;
+      const result = tile.holder
+        .findPseudoLegalMoves(false)
+        .filter(el => !!el)
+        .filter(newTile =>
+          !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(newTile.position, tile.holder.position, tile.holder.color)
+        );
+
+        this.setPossibleMoves(result);
   }
 
   callMoveFigure(newTile: Tile) {
@@ -62,15 +70,12 @@ export class BoardComponent implements OnInit {
   private endTurn() {
     this.unselectFigure();
     this.setPossibleMoves([]);
-    if (this.bd.kingUnderAttack) {
-      console.log(this.bd.kingUnderAttack);
-    }
   }
 
   private setPossibleMoves(pmoves: Tile[]) {
     this.possibleMoves.forEach(el => el.style.border = 'none');
     this.possibleMoves = pmoves;
-    this.possibleMoves.forEach(el => el.style.border = '1.5px green solid');
+    this.possibleMoves.forEach(el => el.style.border = '2px green solid');
   }
 
   private isTileInPossibleMoves(tile: Tile): boolean {

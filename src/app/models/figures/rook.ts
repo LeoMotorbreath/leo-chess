@@ -11,13 +11,17 @@ export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
   image: string;
   haventMoved = true;
 
-  constructor(pos: Position, color: boolean, board: Board) {
-    super(board, pos, color);
+  constructor(tile: Tile, color: boolean, board: Board) {
+    super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.rook : Guris.svgb + Guris.rook;
   }
 
   findPseudoLegalMoves(): Tile[] {
-    return this.getStraightMoves();
+    return this.getStraightMoves(false);
+  }
+
+  getAttacks(): Tile[] {
+    return this.getStraightMoves(true);
   }
 
   move(tile: Tile) {
@@ -25,7 +29,9 @@ export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
     this.haventMoved = false;
   }
 
-  private getStraightMoves(): Tile[] {
-    return getStraightMoves.bind(this)();
+  private getStraightMoves(protection: boolean): Tile[] {
+    return getStraightMoves.bind(this)(protection);
   }
+
+
 }

@@ -9,8 +9,9 @@
                 'border': tile.style.border
              }"
        >
+         <span style="position: absolute">{{tile.id}}</span>
          <div *ngIf="tile.holder">
-           <span style="position: absolute"> {{ tile.position.row}}{{tile.position.y}}</span>
+<!--           <span style="position: absolute">{{tile.position.row}}{{tile.position.y}}</span>-->
            <img class="abstract-figure"
                 [src]="tile.holder.image"
                 [ngStyle]="{'background': this.getTileBackground(tile)}"

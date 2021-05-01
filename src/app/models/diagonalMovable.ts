@@ -1,4 +1,4 @@
-export function getDiagonalMoves() {
+export function getDiagonalMoves(protectionLeft?: boolean) {
   const moves = [];
 
   for (let i = 1; i < 8; i++) {
@@ -7,7 +7,7 @@ export function getDiagonalMoves() {
       let tile = row[this.position.y + i];
       moves.push(tile);
       if(tile.holder) {
-        if (tile.holder.color === this.color) {
+        if (tile.holder.color === this.color && !protectionLeft) {
           moves.pop();
         }
         break;
@@ -21,7 +21,7 @@ export function getDiagonalMoves() {
       let tile = row[this.position.y - i];
       moves.push(tile);
       if(tile.holder) {
-        if (tile.holder.color === this.color) {
+        if (tile.holder.color === this.color && !protectionLeft) {
           moves.pop();
         }
         break;
@@ -35,7 +35,7 @@ export function getDiagonalMoves() {
       let tile = row[this.position.y - i];
       moves.push(tile);
       if(tile.holder) {
-        if (tile.holder.color === this.color) {
+        if (tile.holder.color === this.color && !protectionLeft) {
           moves.pop();
         }
         break;
@@ -49,7 +49,7 @@ export function getDiagonalMoves() {
       let tile = row[this.position.y + i];
       moves.push(tile);
       if(tile.holder) {
-        if (tile.holder.color === this.color) {
+        if (tile.holder.color === this.color && !protectionLeft) {
           moves.pop();
         }
         break;

@@ -4,12 +4,8 @@ import {Pawn} from './figures/pawn';
 import {Position} from './position';
 import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
-import {Movable} from "./movable";
-import {Queen} from "./figures/queen";
-import {catchError} from "rxjs/operators";
 
-
-type Row = Tile[];
+export type Row = Tile[];
 type Rows = Row[];
 interface ElPasantMeta {
   elPasantCheck: boolean,
@@ -17,10 +13,11 @@ interface ElPasantMeta {
 }
 export class Board {
   rows: Rows = [];
-  currentTurn = true;
-  elPasantMeta: ElPasantMeta | null;
-  kingUnderAttack: null | Position;
   figures: AbstractFigure[] = [];
+  elPasantMeta: ElPasantMeta | null;
+  kingUnderAttack: Position | null;
+  currentTurn = true;
+
   constructor() {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
@@ -28,10 +25,8 @@ export class Board {
   }
 
   moveFigure(tile: Tile, figure: AbstractFigure) {
-    if (tile.holder) {
-      this.removeFigure(tile.holder);
-    }
-    this.getTileByPosition(figure.position).holder = null;
+    this.removeFigure((tile.holder as AbstractFigure));
+    figure.tile.holder = null;
     tile.holder = figure;
     this.endTurn(figure.move(tile));
   }
@@ -42,8 +37,35 @@ export class Board {
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
   }
 
+  isMoveCauseAttackToKing(defPos: Position, color: boolean) {
+    const kingTile = this.getFiguresArray(color).find((figure: King) => figure.isKing).tile
+    const defTile = this.getTileByPosition(defPos);
+    const figgure = defTile.holder;
+    defTile.holder = null;
+    const result = this.isTileUnderAttack(kingTile, !color);
+    defTile.holder = figgure;
+    return result;
+  }
+
+  isKingUnderAttackAfterMove(newPos: Position, prevPos: Position, color: boolean) {
+    const newTile = this.getTileByPosition(newPos);
+    const prevTile = this.getTileByPosition(prevPos);
+    const prevTileFigure = prevTile.holder;
+    const newTileFigure = newTile.holder;
+    this.removeFigure(newTileFigure)
+    prevTile.holder = null;
+    newTile.holder = prevTileFigure;
+    const result = this.isPositionUnderAttack(this.getFiguresArray(color).find((figure: King) => figure.isKing).position, !color)
+    prevTile.holder = prevTileFigure;
+    newTile.holder = null;
+    this.placeFigure(newTileFigure);
+    console.log(this.getTileByPosition(newPos).id + ":" + result);
+    return result;
+  }
+
   removeFigure(figure: AbstractFigure): void {
-    this.getTileByPosition(figure.position).holder = null;
+    if(!figure) return;
+    figure.tile.holder = null;
     this.figures = this.figures.filter(el => el !== figure);
   }
 
@@ -54,17 +76,22 @@ export class Board {
     const prevRTile = this.getTileByPosition(rookPos);
     this.getTileByPosition(newPositions.kp).holder = prevKTile.holder;
     this.getTileByPosition(newPositions.rp).holder = prevRTile.holder;
-    prevKTile.holder.position = newPositions.kp;
-    prevRTile.holder.position = newPositions.rp;
     prevKTile.holder = prevRTile.holder = null;
     this.endTurn();
   }
 
   isPositionUnderAttack(position: Position, attackersColor: boolean): boolean {
     return this.getFiguresArray(attackersColor).
-      map(el => el.findPseudoLegalMoves(true)).
+      map((el) => el.getAttacks()).
       reduce((acc, curValue) => acc.concat(curValue)).
       reduce((acc, tile) => !!acc || this.posEqual(tile.position, position), false);
+  }
+
+  isTileUnderAttack(tile: Tile, attackersColor: boolean): boolean {
+     return this.getFiguresArray(attackersColor)
+       .map(af => af.getAttacks())
+       .reduce((acc, value) => acc.concat(value))
+       .some(attackedTile => attackedTile.id === tile.id);
   }
 
   getTileByPosition(pos: Position): Tile {
@@ -73,6 +100,24 @@ export class Board {
 
   posEqual(pos1: Position, pos2: Position): boolean {
     return (pos1.row === pos2.row) && (pos1.y === pos2.y);
+  }
+
+  getAttacks(attackerColor: boolean): Tile[] {
+    return this.getFiguresArray(attackerColor)
+      .map((af: AbstractFigure) => af.getAttacks())
+      .reduce((acc, value) => acc.concat(value));
+  }
+
+  createWhiteFigure(figureClass, tile: Tile) {
+    this.figures.push(new figureClass(tile, true, this));
+  }
+
+  createBlackFigure(figureClass, tile: Tile) {
+    this.figures.push(new figureClass(tile, false, this));
+  }
+
+  placeFigure(figure: AbstractFigure) {
+    if(figure) this.figures.push(this.getTileByPosition(figure.position).holder = figure)
   }
 
   private getFiguresArray(color: boolean): AbstractFigure[] {
@@ -92,24 +137,11 @@ export class Board {
 
   private placeFiguresOnBoard(rows: Rows) {
     for (let i = 0; i < 8; i++) {
-      // this.createWhiteFigure(Pawn, rows[1][i].position);
-      // this.createBlackFigure(Pawn, rows[6][i].position);
-      // this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i].position);
-      // this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i].position)
+      this.createWhiteFigure(Pawn, rows[1][i]);
+      this.createBlackFigure(Pawn, rows[6][i]);
+      this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i]);
+      this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i]);
     }
-    this.createWhiteFigure(King, {row: 0, y: 1});
-    this.createBlackFigure(Queen, {row: 0, y: 2});
-    this.createBlackFigure(King, {row: 0, y: 3});
-
-
-  }
-
-  private createWhiteFigure(figureClass, position: Position) {
-    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, true, this));
-  }
-
-  private createBlackFigure(figureClass, position: Position) {
-    this.figures.push(this.getTileByPosition(position).holder = new figureClass(position, false, this));
   }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
@@ -131,7 +163,7 @@ export class Board {
       const kingPosition = this.figures.find(el => (el as King).isKing && (el.color === currentTurn)).position;
       return this.isPositionUnderAttack(kingPosition, !currentTurn) ? kingPosition : null;
     } catch (error) {
-     return null
+      return null;
     }
   }
 }

@@ -10,16 +10,22 @@ export class Bishop extends Movable implements AbstractFigure  {
   image: string;
   color: boolean;
 
-  constructor(pos: Position, color: boolean, board: Board) {
-    super(board, pos, color);
+  constructor(tile: Tile, color: boolean, board: Board) {
+    super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.bishop : Guris.svgb + Guris.bishop;
   }
 
   findPseudoLegalMoves(): Tile[] {
-    return this.getDiagonalMoves();
+    return this.getDiagonalMoves(false);
   }
 
-  private getDiagonalMoves() {
-    return getDiagonalMoves.bind(this)();
+  getAttacks(): Tile[] {
+    return this.getDiagonalMoves(true);
   }
+
+  private getDiagonalMoves(protection: boolean) {
+    return getDiagonalMoves.bind(this)(protection);
+  }
+
+
 }
