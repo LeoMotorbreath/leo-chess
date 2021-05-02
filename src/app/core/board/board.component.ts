@@ -23,7 +23,7 @@ export class BoardComponent implements OnInit {
   setFigureSelected(tile: Tile) {
       this.selectedFigureTile = tile;
       const result = tile.holder
-        .findPseudoLegalMoves(false)
+        .findPseudoLegalMoves()
         .filter(el => !!el)
         .filter(newTile =>
           !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(newTile.position, tile.holder.position, tile.holder.color)

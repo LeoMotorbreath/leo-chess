@@ -16,13 +16,13 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
     this.image = color ? Guris.svgw + Guris.king : Guris.svgb + Guris.king ;
   }
 
-  findPseudoLegalMoves(dontCheckDanger: boolean): Tile[] {
+  findPseudoLegalMoves(): Tile[] {
     const row = (this.board.rows[this.position.row]);
     const kingTIle = this.tile
     const king = kingTIle.holder;
     kingTIle.holder = null;
     const defaultMoves = this.filterProtected(this.getDefaultMoves(false));
-    if (this.kingIsReadyToCastle(dontCheckDanger)) {
+    if (this.kingIsReadyToCastle()) {
       if (this.rookReadyToCastle(row, 0) && this.getCastlePathValid(1, this.position.y, row)) {
         defaultMoves.push(row[0]);
       }
@@ -53,8 +53,8 @@ export class King extends Movable implements AbstractFigure, IHaveMoved {
     return true;
   }
 
-  private kingIsReadyToCastle(dontCheckDanger: boolean): boolean {
-    return !dontCheckDanger && this.haventMoved && !this.board.isTileUnderAttack(this.board.getTileByPosition(this.position), !this.color);
+  private kingIsReadyToCastle(): boolean {
+    return this.haventMoved && !this.board.isTileUnderAttack(this.board.getTileByPosition(this.position), !this.color);
   }
 
   private rookReadyToCastle(row, index: number): boolean {

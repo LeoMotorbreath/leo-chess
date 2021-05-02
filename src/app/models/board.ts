@@ -59,7 +59,6 @@ export class Board {
     prevTile.holder = prevTileFigure;
     newTile.holder = null;
     this.placeFigure(newTileFigure);
-    console.log(this.getTileByPosition(newPos).id + ":" + result);
     return result;
   }
 
