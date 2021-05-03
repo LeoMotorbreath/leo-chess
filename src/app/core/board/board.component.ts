@@ -3,6 +3,7 @@ import {Board} from '../../models/board';
 import {Tile} from '../../models/tile';
 import {Position} from '../../models/position';
 import {AbstractFigure} from "../../models/abstract-figure";
+import {King} from "../../models/figures/king";
 
 
 @Component({
@@ -25,8 +26,15 @@ export class BoardComponent implements OnInit {
       const result = tile.holder
         .findPseudoLegalMoves()
         .filter(el => !!el)
-        .filter(newTile =>
-          !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(newTile.position, tile.holder.position, tile.holder.color)
+        .filter(newTile => {
+          console.log((tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(newTile.position, tile.holder.position, tile.holder.color),
+          this.bd.emulateMove(
+            {newPos: newTile.position, prevPos: tile.holder.position, color: tile.holder.color},
+            (color) => this.bd.isPositionUnderAttack(this.bd.getFiguresArray(color).find((figure: King) => figure.isKing).position, !color))
+          )
+          return !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(newTile.position, tile.holder.position, tile.holder.color)
+        }
+
         );
 
         this.setPossibleMoves(result);

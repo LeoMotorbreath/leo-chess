@@ -4,6 +4,7 @@ import {Pawn} from './figures/pawn';
 import {Position} from './position';
 import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
+import {Queen} from "./figures/queen";
 
 export type Row = Tile[];
 type Rows = Row[];
@@ -11,6 +12,13 @@ interface ElPasantMeta {
   elPasantCheck: boolean,
   elPasantPosition: Position
 }
+
+interface MoveEmulatorDate {
+  newPos: Position;
+  prevPos: Position;
+  color: boolean;
+}
+
 export class Board {
   rows: Rows = [];
   figures: AbstractFigure[] = [];
@@ -35,16 +43,9 @@ export class Board {
     this.currentTurn = !this.currentTurn;
     this.elPasantMeta = meta;
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
-  }
-
-  isMoveCauseAttackToKing(defPos: Position, color: boolean) {
-    const kingTile = this.getFiguresArray(color).find((figure: King) => figure.isKing).tile
-    const defTile = this.getTileByPosition(defPos);
-    const figgure = defTile.holder;
-    defTile.holder = null;
-    const result = this.isTileUnderAttack(kingTile, !color);
-    defTile.holder = figgure;
-    return result;
+    if (this.kingUnderAttack) {
+      console.log(this.isCheckMate(this.currentTurn));
+    }
   }
 
   isKingUnderAttackAfterMove(newPos: Position, prevPos: Position, color: boolean) {
@@ -56,6 +57,21 @@ export class Board {
     prevTile.holder = null;
     newTile.holder = prevTileFigure;
     const result = this.isPositionUnderAttack(this.getFiguresArray(color).find((figure: King) => figure.isKing).position, !color)
+    prevTile.holder = prevTileFigure;
+    newTile.holder = null;
+    this.placeFigure(newTileFigure);
+    return result;
+  }
+
+  emulateMove(moveEmulatorDate: MoveEmulatorDate, callBack: Function) {
+    const newTile = this.getTileByPosition(moveEmulatorDate.newPos);
+    const prevTile = this.getTileByPosition(moveEmulatorDate.prevPos);
+    const prevTileFigure = prevTile.holder;
+    const newTileFigure = newTile.holder;
+    this.removeFigure(newTileFigure)
+    prevTile.holder = null;
+    newTile.holder = prevTileFigure;
+    const result = callBack(moveEmulatorDate.color)
     prevTile.holder = prevTileFigure;
     newTile.holder = null;
     this.placeFigure(newTileFigure);
@@ -119,7 +135,9 @@ export class Board {
     if(figure) this.figures.push(this.getTileByPosition(figure.position).holder = figure)
   }
 
-  private getFiguresArray(color: boolean): AbstractFigure[] {
+
+
+   getFiguresArray(color: boolean): AbstractFigure[] {
     return this.figures.filter(figure => figure.color === color);
   }
 
@@ -141,6 +159,10 @@ export class Board {
       this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i]);
       this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i]);
     }
+
+    // this.createWhiteFigure(King, rows[1][5]);
+    // this.createWhiteFigure(Queen, rows[5][6]);
+    // this.createBlackFigure(King, rows[1][7]);
   }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
@@ -164,5 +186,23 @@ export class Board {
     } catch (error) {
       return null;
     }
+  }
+
+  private findKing(color: boolean): King {
+    return (this.getFiguresArray(color).find(figure => (figure as King).isKing) as King)
+  }
+
+  // interface MoveEmulatorDate {
+//   newPos: Position;
+//   prevPos: Position;
+//   color: boolean;
+// }
+  private isCheckMate(color: boolean): boolean {
+    const king = this.findKing(color);
+    const pmoves = this
+      .getFiguresArray(color)
+      .map(f => f.findPseudoLegalMoves())
+      .reduce((acc, value) => acc.concat(value));
+    return color;
   }
 }
