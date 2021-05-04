@@ -2,10 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import {Board, MoveEmulatorData} from '../../models/board';
 import {Tile} from '../../models/tile';
 import {Position} from '../../models/position';
-import {AbstractFigure} from "../../models/abstract-figure";
-import {King} from "../../models/figures/king";
-import {retry} from 'rxjs/operators';
-
 
 @Component({
   selector: 'app-board',

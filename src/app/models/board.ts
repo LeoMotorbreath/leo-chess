@@ -4,7 +4,8 @@ import {Pawn} from './figures/pawn';
 import {Position} from './position';
 import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
-import {Queen} from "./figures/queen";
+import {Queen} from './figures/queen';
+import {Subject} from 'rxjs';
 
 export type Row = Tile[];
 type Rows = Row[];
@@ -25,13 +26,15 @@ export class Board {
   figures: AbstractFigure[] = [];
   elPasantMeta: ElPasantMeta | null;
   kingUnderAttack: Position | null;
-  currentTurn = true;
+  currentTurn = false;
+  ins: Board | null;
+  gameResultStream = new Subject();
 
   constructor() {
+    if (this.ins) return this.ins;
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
-    this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
-    console.log(this);
+    this.endTurn();
   }
 
   moveFigure(tile: Tile, figure: AbstractFigure) {
@@ -46,7 +49,12 @@ export class Board {
     this.elPasantMeta = meta;
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
     if (this.kingUnderAttack && this.isCheckMate(this.currentTurn)) {
-      console.log('fuck!!!')
+      this.gameResultStream.next({text: 'check mate!' + this.currentTurn ? 'white' : 'black' + 'won!'});
+      return;
+    }
+    if (this.isPat(this.currentTurn)) {
+      this.gameResultStream.next({text: 'pat! game is over with draw result!!!'});
+      return;
     }
   }
 
@@ -83,17 +91,18 @@ export class Board {
   }
 
   isPositionUnderAttack(position: Position, attackersColor: boolean): boolean {
-    return this.getFiguresArray(attackersColor).
-      map((el) => el.getAttacks()).
-      reduce((acc, curValue) => acc.concat(curValue)).
-      reduce((acc, tile) => !!acc || this.posEqual(tile.position, position), false);
+    return this
+      .getFiguresArray(attackersColor)
+      .map((el) => el.getAttacks())
+      .reduce((acc, curValue) => acc.concat(curValue))
+      .reduce((acc, tile) => !!acc || this.posEqual(tile.position, position), false);
   }
 
   isTileUnderAttack(tile: Tile, attackersColor: boolean): boolean {
-     return this.getFiguresArray(attackersColor)
-       .map(af => af.getAttacks())
-       .reduce((acc, value) => acc.concat(value), [])
-       .some(attackedTile => attackedTile.id === tile.id);
+    return this.getFiguresArray(attackersColor)
+      .map(af => af.getAttacks())
+      .reduce((acc, value) => acc.concat(value), [])
+      .some(attackedTile => attackedTile.id === tile.id);
   }
 
   getTileByPosition(pos: Position): Tile {
@@ -119,11 +128,15 @@ export class Board {
   }
 
   placeFigure(figure: AbstractFigure) {
-    if(figure) this.figures.push(this.getTileByPosition(figure.position).holder = figure)
+    if (figure) this.figures.push(this.getTileByPosition(figure.position).holder = figure);
   }
 
-   getFiguresArray(color: boolean): AbstractFigure[] {
+  getFiguresArray(color: boolean): AbstractFigure[] {
     return this.figures.filter(figure => figure.color === color);
+  }
+
+  findKing(color: boolean): King {
+    return (this.getFiguresArray(color).find(figure => (figure as King).isKing) as King);
   }
 
   private generateBoard(): Rows {
@@ -144,20 +157,31 @@ export class Board {
       this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i]);
       this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i]);
     }
-    //
-    // this.createWhiteFigure(King, rows[1][5]);
-    // this.createWhiteFigure(Queen, rows[5][6]);
-    // this.createBlackFigure(King, rows[1][7]);
+
+    // this.createBlackFigure(King, rows[0][6]);
+    // this.createBlackFigure(Queen, rows[4][6]);
+    // this.createWhiteFigure(King, rows[2][7]);
+    // this.createWhiteFigure(Pawn, rows[5][5]);
+    // this.createBlackFigure(Pawn, rows[6][5]);
+  }
+
+  isPat(color: boolean): boolean {
+    const figuresWithoutKingMoves = this
+      .getFiguresArray(color)
+      .filter(el => el !== this.findKing(color))
+      .reduce((acc, f) => acc.concat(f.findPseudoLegalMoves()), []);
+    // console.log(figuresWithoutKingMoves, this.isPositionUnderAttack(this.findKing(color).position, !color));
+    return !figuresWithoutKingMoves.length && !this.isPositionUnderAttack(this.findKing(color).position, !color);
   }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
     const isShort = kp.y > rp.y;
     return {
-      kp : {
+      kp: {
         row,
         y: isShort ? kp.y - 2 : kp.y + 2
       },
-      rp : {
+      rp: {
         row,
         y: isShort ? kp.y - 1 : kp.y + 1
       }
@@ -173,15 +197,6 @@ export class Board {
     }
   }
 
-  findKing(color: boolean): King {
-    return (this.getFiguresArray(color).find(figure => (figure as King).isKing) as King);
-  }
-
-  // interface MoveEmulatorDate {
-//   newPos: Position;
-//   prevPos: Position;
-//   color: boolean;
-// }
 
   private getMoveEmulatorData(figure: AbstractFigure, newPos: Position): MoveEmulatorData {
     return {

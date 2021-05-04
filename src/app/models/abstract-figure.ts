@@ -7,7 +7,7 @@ export interface AbstractFigure {
   board: Board;
   image: string;
   color: boolean;
-  tile: Tile
+  tile: Tile;
 
   findPseudoLegalMoves(dontCheckDanger?: boolean): Tile[];
   getAttacks(): Tile[];
