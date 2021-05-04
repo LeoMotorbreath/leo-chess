@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import {Board} from '../../models/board';
+import {Board, MoveEmulatorData} from '../../models/board';
 import {Tile} from '../../models/tile';
 import {Position} from '../../models/position';
 import {AbstractFigure} from "../../models/abstract-figure";
+import {King} from "../../models/figures/king";
+import {retry} from 'rxjs/operators';
 
 
 @Component({
@@ -24,12 +26,12 @@ export class BoardComponent implements OnInit {
       this.selectedFigureTile = tile;
       const result = tile.holder
         .findPseudoLegalMoves()
-        .filter(el => !!el)
-        .filter(newTile =>
-          !(tile.holder as AbstractFigure).board.isKingUnderAttackAfterMove(newTile.position, tile.holder.position, tile.holder.color)
+        .filter(el => Boolean(el))
+        .filter(newTile => this.bd.emulateMove(this.getMoveEmultorData(tile, newTile.position), (color) => {
+                  return !this.bd.isPositionUnderAttack(this.bd.findKing(color).position, !color);
+                })
         );
-
-        this.setPossibleMoves(result);
+      this.setPossibleMoves(result);
   }
 
   callMoveFigure(newTile: Tile) {
@@ -44,7 +46,7 @@ export class BoardComponent implements OnInit {
 
     if (this.bd.kingUnderAttack && (tile === this.bd.getTileByPosition(this.bd.kingUnderAttack))) {
       return 'red';
-    };
+    }
   }
 
   handleClick(tile: Tile) {
@@ -92,5 +94,12 @@ export class BoardComponent implements OnInit {
     this.endTurn();
   }
 
-
+  private getMoveEmultorData(prevTile: Tile, newPos: Position): MoveEmulatorData {
+   return {
+     newPos,
+     prevPos: prevTile.holder.position,
+     color: prevTile.holder.color,
+     args: [prevTile.holder.color]
+   };
+  }
 }
