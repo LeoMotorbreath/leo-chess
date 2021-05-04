@@ -9,14 +9,15 @@ import {Queen} from "./figures/queen";
 export type Row = Tile[];
 type Rows = Row[];
 interface ElPasantMeta {
-  elPasantCheck: boolean,
-  elPasantPosition: Position
+  elPasantCheck: boolean;
+  elPasantPosition: Position;
 }
 
-interface MoveEmulatorDate {
+export interface MoveEmulatorData {
   newPos: Position;
   prevPos: Position;
   color: boolean;
+  args?: any[];
 }
 
 export class Board {
@@ -30,6 +31,7 @@ export class Board {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
+    console.log(this);
   }
 
   moveFigure(tile: Tile, figure: AbstractFigure) {
@@ -43,35 +45,20 @@ export class Board {
     this.currentTurn = !this.currentTurn;
     this.elPasantMeta = meta;
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
-    if (this.kingUnderAttack) {
-      console.log(this.isCheckMate(this.currentTurn));
+    if (this.kingUnderAttack && this.isCheckMate(this.currentTurn)) {
+      console.log('fuck!!!')
     }
   }
 
-  isKingUnderAttackAfterMove(newPos: Position, prevPos: Position, color: boolean) {
-    const newTile = this.getTileByPosition(newPos);
-    const prevTile = this.getTileByPosition(prevPos);
-    const prevTileFigure = prevTile.holder;
-    const newTileFigure = newTile.holder;
-    this.removeFigure(newTileFigure)
-    prevTile.holder = null;
-    newTile.holder = prevTileFigure;
-    const result = this.isPositionUnderAttack(this.getFiguresArray(color).find((figure: King) => figure.isKing).position, !color)
-    prevTile.holder = prevTileFigure;
-    newTile.holder = null;
-    this.placeFigure(newTileFigure);
-    return result;
-  }
-
-  emulateMove(moveEmulatorDate: MoveEmulatorDate, callBack: Function) {
+  emulateMove(moveEmulatorDate: MoveEmulatorData, callBack: Function) {
     const newTile = this.getTileByPosition(moveEmulatorDate.newPos);
     const prevTile = this.getTileByPosition(moveEmulatorDate.prevPos);
     const prevTileFigure = prevTile.holder;
     const newTileFigure = newTile.holder;
-    this.removeFigure(newTileFigure)
+    this.removeFigure(newTileFigure);
     prevTile.holder = null;
     newTile.holder = prevTileFigure;
-    const result = callBack(moveEmulatorDate.color)
+    const result = callBack(...moveEmulatorDate.args);
     prevTile.holder = prevTileFigure;
     newTile.holder = null;
     this.placeFigure(newTileFigure);
@@ -79,7 +66,7 @@ export class Board {
   }
 
   removeFigure(figure: AbstractFigure): void {
-    if(!figure) return;
+    if (!figure) return;
     figure.tile.holder = null;
     this.figures = this.figures.filter(el => el !== figure);
   }
@@ -105,7 +92,7 @@ export class Board {
   isTileUnderAttack(tile: Tile, attackersColor: boolean): boolean {
      return this.getFiguresArray(attackersColor)
        .map(af => af.getAttacks())
-       .reduce((acc, value) => acc.concat(value))
+       .reduce((acc, value) => acc.concat(value), [])
        .some(attackedTile => attackedTile.id === tile.id);
   }
 
@@ -135,8 +122,6 @@ export class Board {
     if(figure) this.figures.push(this.getTileByPosition(figure.position).holder = figure)
   }
 
-
-
    getFiguresArray(color: boolean): AbstractFigure[] {
     return this.figures.filter(figure => figure.color === color);
   }
@@ -159,7 +144,7 @@ export class Board {
       this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i]);
       this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i]);
     }
-
+    //
     // this.createWhiteFigure(King, rows[1][5]);
     // this.createWhiteFigure(Queen, rows[5][6]);
     // this.createBlackFigure(King, rows[1][7]);
@@ -188,8 +173,8 @@ export class Board {
     }
   }
 
-  private findKing(color: boolean): King {
-    return (this.getFiguresArray(color).find(figure => (figure as King).isKing) as King)
+  findKing(color: boolean): King {
+    return (this.getFiguresArray(color).find(figure => (figure as King).isKing) as King);
   }
 
   // interface MoveEmulatorDate {
@@ -197,12 +182,20 @@ export class Board {
 //   prevPos: Position;
 //   color: boolean;
 // }
+
+  private getMoveEmulatorData(figure: AbstractFigure, newPos: Position): MoveEmulatorData {
+    return {
+      newPos,
+      prevPos: figure.position,
+      color: figure.color,
+    };
+  }
+
   private isCheckMate(color: boolean): boolean {
-    const king = this.findKing(color);
-    const pmoves = this
+    return !this
       .getFiguresArray(color)
-      .map(f => f.findPseudoLegalMoves())
-      .reduce((acc, value) => acc.concat(value));
-    return color;
+      .map((figure) => figure.findPseudoLegalMoves().map((tile) => this.getMoveEmulatorData(figure, tile.position)))
+      .reduce((acc: any[], value: any[]) => acc.concat(value), [])
+      .filter((data) => this.emulateMove(data, () => !this.isKingUnderAttack(data.color))).length;
   }
 }
