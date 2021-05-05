@@ -25,4 +25,11 @@
   background: aliceblue;
   margin-top: auto;
   margin-bottom: auto;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+.modal div {
+  padding: 20px;
 }

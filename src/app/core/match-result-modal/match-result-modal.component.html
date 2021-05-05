@@ -1,8 +1,7 @@
-<div class="modal-wrapper" *ngIf="showModal">
+<div class="modal-wrapper" *ngIf="vm.showModal" (click)="closeModal()">
   <div class="modal-container">
     <div class="modal">
-
+      <div>{{vm.modalText}}</div>
     </div>
   </div>
-
 </div>

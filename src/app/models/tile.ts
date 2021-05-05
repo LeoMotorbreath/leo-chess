@@ -9,7 +9,7 @@ export interface ITile {
   holder: TileHolder;
   color: boolean;
   style: object;
-  id: number
+  id: number;
 }
 
 export class Tile implements ITile {
@@ -19,10 +19,10 @@ export class Tile implements ITile {
   position: Position;
   style: any = {};
   // holder: TileHolder;
-  _holder: TileHolder
+  _holder: TileHolder;
   set holder(figure: AbstractFigure) {
     this._holder = figure;
-    if(figure) figure.tile = this;
+    if (figure) figure.tile = this;
   }
 
   get holder() {
@@ -32,6 +32,6 @@ export class Tile implements ITile {
   constructor(position, color) {
     this.position = position;
     this.color = color;
-    this.id = ++Tile.count
+    this.id = ++Tile.count;
   }
 }

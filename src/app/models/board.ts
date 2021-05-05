@@ -6,7 +6,8 @@ import {FList} from '../shared/figuresList';
 import {King} from './figures/king';
 import {Queen} from './figures/queen';
 import {Subject} from 'rxjs';
-
+import {getRestartGameStream} from '../core/match-result-modal/match-result-modal.component';
+import {take} from 'rxjs/operators';
 export type Row = Tile[];
 type Rows = Row[];
 interface ElPasantMeta {
@@ -27,16 +28,23 @@ export class Board {
   elPasantMeta: ElPasantMeta | null;
   kingUnderAttack: Position | null;
   currentTurn = false;
-  ins: Board | null;
+  static ins: Board | null;
   gameResultStream = new Subject();
 
   constructor() {
-    if (this.ins) return this.ins;
+    if (Board.ins) {
+      return Board.ins;
+    } else {
+      this.initField();
+      Board.ins = this;
+    }
+  }
+
+  private initField() {
     this.rows = this.generateBoard();
     this.placeFiguresOnBoard(this.rows);
     this.endTurn();
   }
-
   moveFigure(tile: Tile, figure: AbstractFigure) {
     this.removeFigure((tile.holder as AbstractFigure));
     figure.tile.holder = null;
@@ -49,11 +57,12 @@ export class Board {
     this.elPasantMeta = meta;
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
     if (this.kingUnderAttack && this.isCheckMate(this.currentTurn)) {
-      this.gameResultStream.next({text: 'check mate!' + this.currentTurn ? 'white' : 'black' + 'won!'});
+      this.gameResultStream.next({text: (`check mate!  ${this.currentTurn ? 'white' : 'black'} won!`)});
+      this.emitGameResult({text: (`check mate!  ${this.currentTurn ? 'white' : 'black'} won!`)});
       return;
     }
     if (this.isPat(this.currentTurn)) {
-      this.gameResultStream.next({text: 'pat! game is over with draw result!!!'});
+      this.emitGameResult({text: 'pat! game is over with draw result!!!'});
       return;
     }
   }
@@ -147,6 +156,7 @@ export class Board {
         rows[row].push(new Tile({row, y: ceil}, Boolean((row + ceil) % 2)));
       }
     }
+    Tile.count = 0;
     return rows;
   }
 
@@ -212,5 +222,10 @@ export class Board {
       .map((figure) => figure.findPseudoLegalMoves().map((tile) => this.getMoveEmulatorData(figure, tile.position)))
       .reduce((acc: any[], value: any[]) => acc.concat(value), [])
       .filter((data) => this.emulateMove(data, () => !this.isKingUnderAttack(data.color))).length;
+  }
+
+  private emitGameResult(any: any) {
+    this.gameResultStream.next(any);
+    getRestartGameStream().pipe(take(1)).subscribe(() => this.initField());
   }
 }
