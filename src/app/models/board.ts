@@ -48,7 +48,6 @@ export class Board {
   moveFigure(tile: Tile, figure: AbstractFigure) {
     this.removeFigure((tile.holder as AbstractFigure));
     figure.tile.holder = null;
-    tile.holder = figure;
     this.endTurn(figure.move(tile));
   }
 

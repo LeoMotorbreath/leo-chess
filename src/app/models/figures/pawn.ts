@@ -33,6 +33,7 @@ export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
 
   move(tile: Tile): any {
     const elPasantCheck = (this.position.row - tile.position.row) % 2 === 0;
+    console.log(this.position.row, tile.position.row);
     super.move(tile);
     this.haventMoved = false;
     if (tile.position.row === this.lastTileIndex) {

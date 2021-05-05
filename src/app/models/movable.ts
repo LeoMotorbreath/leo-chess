@@ -22,7 +22,7 @@ export class Movable {
   }
 
   move(tile: Tile): void {
-    this.tile = tile;
+    tile.holder = (this as unknown as AbstractFigure);
   }
 
   protected check(row, y, protectionLeft?: boolean): Tile | null {
