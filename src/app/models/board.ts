@@ -8,18 +8,12 @@ import {Queen} from './figures/queen';
 import {Subject} from 'rxjs';
 import {getRestartGameStream} from '../core/match-result-modal/match-result-modal.component';
 import {take} from 'rxjs/operators';
+import {MoveEmulatorData} from './moveData';
 export type Row = Tile[];
 type Rows = Row[];
 interface ElPasantMeta {
   elPasantCheck: boolean;
   elPasantPosition: Position;
-}
-
-export interface MoveEmulatorData {
-  newPos: Position;
-  prevPos: Position;
-  color: boolean;
-  args?: any[];
 }
 
 export class Board {
@@ -32,12 +26,14 @@ export class Board {
   gameResultStream = new Subject();
 
   constructor() {
+
     if (Board.ins) {
       return Board.ins;
     } else {
       this.initField();
       Board.ins = this;
     }
+    console.log(this)
   }
 
   private initField() {
@@ -64,6 +60,22 @@ export class Board {
       this.emitGameResult({text: 'pat! game is over with draw result!!!'});
       return;
     }
+  }
+
+  private getMoveEmultorDataTemp(prevTile: Tile, newPos: Position): MoveEmulatorData {
+    return {
+      newPos,
+      prevPos: prevTile.holder.position,
+      color: prevTile.holder.color,
+      args: [prevTile.holder.color]
+    };
+  }
+
+  filterPseudoPossibleMove(tile: Tile, moves: Tile[]): Tile[] {
+    return moves.filter(newTile => this.emulateMove(this.getMoveEmultorDataTemp(tile, newTile.position), (color) => {
+        return !this.isPositionUnderAttack(this.findKing(color).position, !color);
+      })
+    );
   }
 
   emulateMove(moveEmulatorDate: MoveEmulatorData, callBack: Function) {
@@ -166,12 +178,6 @@ export class Board {
       this.createWhiteFigure(FList.$[FList.strFiguresRep[i]], rows[0][i]);
       this.createBlackFigure(FList.$[FList.strFiguresRep[i]], rows[7][i]);
     }
-
-    // this.createBlackFigure(King, rows[0][6]);
-    // this.createBlackFigure(Queen, rows[4][6]);
-    // this.createWhiteFigure(King, rows[2][7]);
-    // this.createWhiteFigure(Pawn, rows[5][5]);
-    // this.createBlackFigure(Pawn, rows[6][5]);
   }
 
   isPat(color: boolean): boolean {
@@ -179,7 +185,6 @@ export class Board {
       .getFiguresArray(color)
       .filter(el => el !== this.findKing(color))
       .reduce((acc, f) => acc.concat(f.findPseudoLegalMoves()), []);
-    // console.log(figuresWithoutKingMoves, this.isPositionUnderAttack(this.findKing(color).position, !color));
     return !figuresWithoutKingMoves.length && !this.isPositionUnderAttack(this.findKing(color).position, !color);
   }
 

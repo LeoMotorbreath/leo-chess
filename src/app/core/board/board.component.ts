@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {Board, MoveEmulatorData} from '../../models/board';
 import {Tile} from '../../models/tile';
 import {Position} from '../../models/position';
+import {Engine} from '../../engine/main';
 
 @Component({
   selector: 'app-board',
@@ -11,11 +12,13 @@ import {Position} from '../../models/position';
 
 export class BoardComponent implements OnInit {
   bd: Board;
+  engine: Engine;
   selectedFigureTile: Tile;
   possibleMoves: Tile[] = [];
 
   ngOnInit() {
     this.bd = new Board();
+    this.engine = new Engine(this.bd);
   }
 
   setFigureSelected(tile: Tile) {

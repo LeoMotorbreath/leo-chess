@@ -8,6 +8,9 @@
   width: var(--bd-size);
   height: var(--bd-size);
   margin:auto;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
 }
 .bd-row {
   display: flex;

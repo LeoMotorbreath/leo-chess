@@ -1,0 +1,18 @@
+.b-wrapper button {
+  width: 150px;
+  height: 40px;
+  margin: 30px;
+}
+
+.b-wrapper {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  margin-top: 50px;
+  width: 100%;
+}
+
+.modal {
+  flex-direction: column;
+}

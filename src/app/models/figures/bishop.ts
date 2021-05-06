@@ -9,7 +9,7 @@ import {Movable} from '../movable';
 export class Bishop extends Movable implements AbstractFigure  {
   image: string;
   color: boolean;
-
+  engineValue = 3;
   constructor(tile: Tile, color: boolean, board: Board) {
     super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.bishop : Guris.svgb + Guris.bishop;

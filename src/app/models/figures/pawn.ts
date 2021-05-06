@@ -9,6 +9,7 @@ import {Queen} from "./queen";
 export class Pawn extends Movable implements AbstractFigure, IHaveMoved {
   image: string;
   haventMoved = true;
+  engineValue = 1;
   private readonly lastTileIndex: number;
   private readonly direction: 1 | -1;
 

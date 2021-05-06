@@ -11,7 +11,7 @@ import {getStraightMoves} from '../straightMovable';
 
 export class Queen extends Movable implements AbstractFigure  {
   image: string;
-
+  engineValue = 9;
   constructor(tile: Tile, color: boolean, board: Board) {
     super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.queen : Guris.svgb + Guris.queen;

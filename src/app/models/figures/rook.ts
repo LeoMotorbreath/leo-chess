@@ -10,7 +10,7 @@ import {IHaveMoved} from "../haveMoved";
 export class Rook extends Movable implements AbstractFigure, IHaveMoved  {
   image: string;
   haventMoved = true;
-
+  engineValue = 5;
   constructor(tile: Tile, color: boolean, board: Board) {
     super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.rook : Guris.svgb + Guris.rook;

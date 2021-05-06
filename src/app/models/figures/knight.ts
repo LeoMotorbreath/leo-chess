@@ -7,7 +7,7 @@ import {Tile} from '../tile';
 
 export class Knight extends Movable implements AbstractFigure {
   image: string;
-
+  engineValue = 3;
   constructor(tile: Tile, color: boolean, board: Board) {
     super(board, tile, color);
     this.image = color ? Guris.svgw + Guris.knight  : Guris.svgb + Guris.knight ;

@@ -9,6 +9,7 @@ import {Movable} from '../movable';
 export class King extends Movable implements AbstractFigure, IHaveMoved {
   image: string;
   haventMoved = true;
+  engineValue = 1;
   readonly isKing = true;
 
   constructor(tile: Tile, color: boolean, board: Board) {

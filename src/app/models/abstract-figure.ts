@@ -8,7 +8,7 @@ export interface AbstractFigure {
   image: string;
   color: boolean;
   tile: Tile;
-
+  engineValue: number;
   findPseudoLegalMoves(dontCheckDanger?: boolean): Tile[];
   getAttacks(): Tile[];
   move(tile: Tile);
