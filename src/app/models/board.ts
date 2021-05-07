@@ -36,11 +36,8 @@ export class Board {
     console.log(this)
   }
 
-  private initField() {
-    this.rows = this.generateBoard();
-    this.placeFiguresOnBoard(this.rows);
-    this.endTurn();
-  }
+
+
   moveFigure(tile: Tile, figure: AbstractFigure) {
     this.removeFigure((tile.holder as AbstractFigure));
     figure.tile.holder = null;
@@ -62,14 +59,6 @@ export class Board {
     }
   }
 
-  private getMoveEmultorDataTemp(prevTile: Tile, newPos: Position): MoveEmulatorData {
-    return {
-      newPos,
-      prevPos: prevTile.holder.position,
-      color: prevTile.holder.color,
-      args: [prevTile.holder.color]
-    };
-  }
 
   filterPseudoPossibleMove(tile: Tile, moves: Tile[]): Tile[] {
     return moves.filter(newTile => this.emulateMove(this.getMoveEmultorDataTemp(tile, newTile.position), (color) => {
@@ -159,6 +148,36 @@ export class Board {
     return (this.getFiguresArray(color).find(figure => (figure as King).isKing) as King);
   }
 
+  isPat(color: boolean): boolean {
+    const figuresWithoutKingMoves = this
+      .getFiguresArray(color)
+      .filter(el => el !== this.findKing(color))
+      .reduce((acc, f) => acc.concat(f.findPseudoLegalMoves()), []);
+    return !figuresWithoutKingMoves.length && !this.isPositionUnderAttack(this.findKing(color).position, !color);
+  }
+
+  getAllPPMovesMED(color: boolean): MoveEmulatorData[] {
+    return this
+      .getFiguresArray(color)
+      .map((af) => [...af.findPseudoLegalMoves()].map((tile) => this.getMoveEmulatorData(af, tile.position)))
+      .reduce((acc, value) => acc.concat(value), []);
+  }
+
+  private initField() {
+    this.rows = this.generateBoard();
+    this.placeFiguresOnBoard(this.rows);
+    this.endTurn();
+  }
+
+  private getMoveEmultorDataTemp(prevTile: Tile, newPos: Position): MoveEmulatorData {
+    return {
+      newPos,
+      prevPos: prevTile.holder.position,
+      color: prevTile.holder.color,
+      args: [prevTile.holder.color]
+    };
+  }
+
   private generateBoard(): Rows {
     const rows = [];
     for (let row = 0; row < 8; row++) {
@@ -180,13 +199,6 @@ export class Board {
     }
   }
 
-  isPat(color: boolean): boolean {
-    const figuresWithoutKingMoves = this
-      .getFiguresArray(color)
-      .filter(el => el !== this.findKing(color))
-      .reduce((acc, f) => acc.concat(f.findPseudoLegalMoves()), []);
-    return !figuresWithoutKingMoves.length && !this.isPositionUnderAttack(this.findKing(color).position, !color);
-  }
 
   private getNewPositionsForCastling(row: number, kp: Position, rp: Position) {
     const isShort = kp.y > rp.y;

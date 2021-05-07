@@ -10,6 +10,7 @@ type WLead = -1 | 0 | 1;
 
 interface PScore {
   whoLead: WLead;
+  value: number;
 }
 
 
@@ -26,33 +27,21 @@ export class Engine implements IEngine {
     this.board = board;
   }
 
-  getMove(color) {
-    const fss = this.board.getFiguresArray(color);
-    let x = fss
-      .map((figure): MoveEmulatorData[] => {
-          return this.board.filterPseudoPossibleMove(figure.tile, figure.findPseudoLegalMoves())
-            .map((tile) => (
-                  {
-                    ...getMoveEmulatorDataTemp(figure.tile, tile.position),
-                    args: [fss]
-                  }
-                )
-            );
-      })
-      .reduce((acc, value) => acc.concat(value), [])
-      .map((med) => (
-          {
-            ...med,
-            value: this.board.emulateMove(med, ((fss: AbstractFigure[]) => this.sumValues(fss))),
-          }
-        )
-    );
-    console.log(x)
-    return x
+  getMove(color: boolean) {
+    this.board.getAllPPMovesMED(color);
   }
 
-  getPositionScore(): PScore {
-    const diff = this.sumValues(this.board.getFiguresArray(true)) - this.sumValues(this.board.getFiguresArray(false));
+  getPositionScore(figures?: AbstractFigure[]): PScore {
+    let diff;
+    if (!figures) {
+      diff = this.sumValues(this.board.getFiguresArray(true)) - this.sumValues(this.board.getFiguresArray(false));
+    } else {
+      const reduced = figures.reduce((acc, figure) => {
+        figure.color ? acc.white.push(figure) : acc.black.push(figure);
+        return acc;
+      }, {white: [], black: []});
+      diff = this.sumValues(reduced.white) - this.sumValues(reduced.black);
+    }
     const whoLead = diff === 0 ? 0 : diff > 0 ? 1 : -1;
     return {
       whoLead,
@@ -62,5 +51,11 @@ export class Engine implements IEngine {
 
   private sumValues(fs: AbstractFigure[]) {
     return fs.reduce((acc, f) => acc + f.engineValue, 0);
+  }
+
+
+  //have to save figures state and calculte positions
+  private emulatorCallback(updatedFigures: AbstractFigure[]) {
+    this.getPositionScore(updatedFigures);
   }
 }
