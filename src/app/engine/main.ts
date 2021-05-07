@@ -42,9 +42,8 @@ export class Engine implements IEngine {
       }, {white: [], black: []});
       diff = this.sumValues(reduced.white) - this.sumValues(reduced.black);
     }
-    const whoLead = diff === 0 ? 0 : diff > 0 ? 1 : -1;
     return {
-      whoLead,
+      whoLead: this.getWhoLead(diff),
       value: Math.abs(diff)
     };
   }
@@ -53,6 +52,9 @@ export class Engine implements IEngine {
     return fs.reduce((acc, f) => acc + f.engineValue, 0);
   }
 
+  private getWhoLead(diff: number): WLead {
+    return diff === 0 ? 0 : diff > 0 ? 1 : -1;
+  }
 
   //have to save figures state and calculte positions
   private emulatorCallback(updatedFigures: AbstractFigure[]) {
