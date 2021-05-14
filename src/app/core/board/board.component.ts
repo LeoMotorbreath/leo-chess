@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {Board, MoveEmulatorData} from '../../models/board';
+import {Board} from '../../models/board';
 import {Tile} from '../../models/tile';
 import {Position} from '../../models/position';
 import {Engine} from '../../engine/main';
+import { MoveEmulatorData } from 'src/app/models/moveData';
 
 @Component({
   selector: 'app-board',
@@ -101,4 +102,6 @@ export class BoardComponent implements OnInit {
      args: [prevTile.holder.color]
    };
   }
+
+  
 }

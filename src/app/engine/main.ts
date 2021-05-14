@@ -1,7 +1,6 @@
-import {Board, MoveData} from '../models/board';
+import {Board} from '../models/board';
 import {AbstractFigure} from '../models/abstract-figure';
-import {Tile} from '../models/tile';
-import {getMoveEmulatorDataTemp, MoveEmulatorData} from '../models/moveData';
+import {MoveData, MoveEmulatorData} from '../models/moveData';
 
 const fvalues = {
 
@@ -13,35 +12,42 @@ interface PScore {
   value: number;
 }
 
-
+type EngineCallbackArg = {
+  figures: AbstractFigure[];
+  pscore: PScore;
+  depth: number;
+  chain?: MoveEmulatorData[];
+};
 
 interface IEngine {
-  getMove(): MoveData;
-  getPositionScore(): PScore;
+  getMove(color: boolean);
+  getPositionScore(figures: AbstractFigure[]): PScore;
 }
 
 export class Engine implements IEngine {
   depth = 1;
   board: Board;
+
   constructor(board: Board) {
     this.board = board;
   }
 
   getMove(color: boolean) {
-    this.board.getAllPPMovesMED(color);
-  }
+    console.log(this.board.getAllPPMovesMED(color).map((med) => {
+      return this.board.emulateMove(med, () => this.getPositionScore(this.patchFiguresTile(this.board.figures)))
+    }))
+  } 
 
-  getPositionScore(figures?: AbstractFigure[]): PScore {
-    let diff;
-    if (!figures) {
-      diff = this.sumValues(this.board.getFiguresArray(true)) - this.sumValues(this.board.getFiguresArray(false));
-    } else {
-      const reduced = figures.reduce((acc, figure) => {
-        figure.color ? acc.white.push(figure) : acc.black.push(figure);
-        return acc;
-      }, {white: [], black: []});
-      diff = this.sumValues(reduced.white) - this.sumValues(reduced.black);
-    }
+  getPositionScore(figures: AbstractFigure[]): PScore {
+    
+     
+    const reduced = figures.reduce((acc, figure) => {
+      figure.color ? acc.white.push(figure) : acc.black.push(figure);
+      return acc;
+      }, {white: [], black: []}
+    );
+    const diff = this.sumValues(reduced.white) - this.sumValues(reduced.black);
+  
     return {
       whoLead: this.getWhoLead(diff),
       value: Math.abs(diff)
@@ -53,11 +59,30 @@ export class Engine implements IEngine {
   }
 
   private getWhoLead(diff: number): WLead {
-    return diff === 0 ? 0 : diff > 0 ? 1 : -1;
+    return diff === 0 ? 0 : (diff > 0 ? 1 : -1);
   }
 
   //have to save figures state and calculte positions
-  private emulatorCallback(updatedFigures: AbstractFigure[]) {
-    this.getPositionScore(updatedFigures);
+  private emulatorCallback(arg: EngineCallbackArg) {
+    if (arg.depth === 0) {
+      return arg.chain;
+    } else {
+      arg.depth--;
+    }
+    // return this.getPositionScore(updatedFigures); 
+  }
+
+  private emulatorInner(med: MoveEmulatorData) {
+    
+  }
+
+  cloneFigures(figures: AbstractFigure[]): AbstractFigure[] {
+    const hash = this.board.getFieldClone().reduce((hash, value) => {
+      hash[value.id] = value;
+      return hash;
+    });
+
+    return figures.map(figure => ({...figure, tile: hash[figure.tile.id]}));
   }
 }
+ 

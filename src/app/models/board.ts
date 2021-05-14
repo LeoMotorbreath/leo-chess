@@ -16,6 +16,10 @@ interface ElPasantMeta {
   elPasantPosition: Position;
 }
 
+type getAllPPMovesMEDArg = {
+  color?: boolean,
+  figures?: AbstractFigure[]
+}
 export class Board {
   rows: Rows = [];
   figures: AbstractFigure[] = [];
@@ -49,7 +53,6 @@ export class Board {
     this.elPasantMeta = meta;
     this.kingUnderAttack = this.isKingUnderAttack(this.currentTurn);
     if (this.kingUnderAttack && this.isCheckMate(this.currentTurn)) {
-      this.gameResultStream.next({text: (`check mate!  ${this.currentTurn ? 'white' : 'black'} won!`)});
       this.emitGameResult({text: (`check mate!  ${this.currentTurn ? 'white' : 'black'} won!`)});
       return;
     }
@@ -61,10 +64,8 @@ export class Board {
 
 
   filterPseudoPossibleMove(tile: Tile, moves: Tile[]): Tile[] {
-    return moves.filter(newTile => this.emulateMove(this.getMoveEmultorDataTemp(tile, newTile.position), (color) => {
-        return !this.isPositionUnderAttack(this.findKing(color).position, !color);
-      })
-    );
+    const callBack = (color) => !this.isPositionUnderAttack(this.findKing(color).position, !color);
+    return moves.filter(newTile => this.emulateMove(this.getMoveEmultorDataTemp(tile, newTile.position), callBack));
   }
 
   emulateMove(moveEmulatorDate: MoveEmulatorData, callBack: Function) {
@@ -156,9 +157,8 @@ export class Board {
     return !figuresWithoutKingMoves.length && !this.isPositionUnderAttack(this.findKing(color).position, !color);
   }
 
-  getAllPPMovesMED(color: boolean): MoveEmulatorData[] {
-    return this
-      .getFiguresArray(color)
+  getAllPPMovesMED(arg: getAllPPMovesMEDArg): MoveEmulatorData[] {
+    return (arg.figures || this.getFiguresArray(arg.color))
       .map((af) => [...af.findPseudoLegalMoves()].map((tile) => this.getMoveEmulatorData(af, tile.position)))
       .reduce((acc, value) => acc.concat(value), []);
   }
@@ -243,5 +243,18 @@ export class Board {
   private emitGameResult(any: any) {
     this.gameResultStream.next(any);
     getRestartGameStream().pipe(take(1)).subscribe(() => this.initField());
+  }
+
+  getFieldClone(): Tile[] {
+    return this.rows.reduce((res, value) => res.concat(value.map(tile => ({...tile} as Tile))),[])
+  }
+
+  cloneFigures(): AbstractFigure[] {
+    const hash = this.getFieldClone().reduce((hash, value) => {
+      hash[value.id] = value;
+      return hash;
+    });
+
+    return this.figures.map(figure => ({...figure, tile: hash[figure.tile.id]}));
   }
 }
