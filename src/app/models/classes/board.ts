@@ -1,16 +1,15 @@
 import { Tile } from './tile';
-import {AbstractFigure} from './abstract-figure';
-import {Pawn} from './figures/pawn';
-import {Position} from './position';
-import {FList} from '../shared/figuresList';
-import {King} from './figures/king';
-import {Queen} from './figures/queen';
+import {AbstractFigure} from '../intrefaces/abstract-figure';
+import {Pawn} from '../figures/pawn';
+import {Position} from '../types/position';
+import {FList} from '../../shared/figuresList';
+import {King} from '../figures/king';
 import {Subject} from 'rxjs';
-import {getRestartGameStream} from '../core/match-result-modal/match-result-modal.component';
+import {getRestartGameStream} from '../../core/match-result-modal/match-result-modal.component';
 import {take} from 'rxjs/operators';
-import {MoveEmulatorData} from './moveData';
-export type Row = Tile[];
-type Rows = Row[];
+import {MoveEmulatorData} from '../types/med';
+import { Rows } from '../types/row';
+
 interface ElPasantMeta {
   elPasantCheck: boolean;
   elPasantPosition: Position;
@@ -68,7 +67,7 @@ export class Board {
     return moves.filter(newTile => this.emulateMove(this.getMoveEmultorDataTemp(tile, newTile.position), callBack));
   }
 
-  emulateMove(moveEmulatorDate: MoveEmulatorData, callBack: Function) {
+  emulateMove(moveEmulatorDate: MoveEmulatorData, callBack: (arg: any) => unknown) {
     const newTile = this.getTileByPosition(moveEmulatorDate.newPos);
     const prevTile = this.getTileByPosition(moveEmulatorDate.prevPos);
     const prevTileFigure = prevTile.holder;
@@ -115,8 +114,8 @@ export class Board {
       .some(attackedTile => attackedTile.id === tile.id);
   }
 
-  getTileByPosition(pos: Position): Tile {
-    return this.rows[pos.row][pos.y];
+  getTileByPosition(pos: Position, rows?: Rows): Tile {
+    return (rows || this.rows)[pos.row][pos.y];
   }
 
   posEqual(pos1: Position, pos2: Position): boolean {
